@@ -12,15 +12,11 @@ class Figure(object):
 class Point(Figure):
     """ 図形を扱うときの基本となる点 """
 
-    def __init__(self, x, y, rgb=None):
+    def __init__(self, x, y, rgb=(0, 0, 0)):
         """ 座標が(x,y)で色がrgbの点を返す """
         self.x = x
         self.y = y
-        if rgb is not None:
-            rgb[0] = int(rgb[0])
-            rgb[1] = int(rgb[1])
-            rgb[2] = int(rgb[2])
-        self.rgb = rgb
+        self.rgb = [int(x) for x in rgb]
 
     def __repr__(self):
         return "Point(%s, %s, %s)" % (self.x, self.y, self.rgb)
@@ -31,11 +27,7 @@ class Point(Figure):
         # r = 1 で b
         x = (b.x - self.x) * r + self.x
         y = (b.y - self.y) * r + self.y
-        rgb = [0, 0, 0]
-        if self.rgb is not None:
-            rgb[0] = (b.rgb[0] - self.rgb[0]) * r + self.rgb[0]
-            rgb[1] = (b.rgb[1] - self.rgb[1]) * r + self.rgb[1]
-            rgb[2] = (b.rgb[2] - self.rgb[2]) * r + self.rgb[2]
+        rgb = [(x - y) * r + y for x, y in zip(b.rgb, self.rgb)]
         return Point(x, y, rgb)
 
 
