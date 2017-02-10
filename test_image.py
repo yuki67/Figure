@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
 """ 図形描画のテスト """
 import os
-
+import random
 from PIL import Image
-
 from Figure import Line, Point, Diamond
 from JPGPainter import JPGPainter
+
+width, height = 4096, 4096
+center = [width / 2, height / 2]
 
 
 def draw(img: Image.Image):
     """ 図形描画本体 """
-    lines = [Line(Point(1.0, 1.0), Point(1.0, 511.0)),
-             Line(Point(1.0, 1.0), Point(511.0, 1.0)),
-             Line(Point(511.0, 511.0), Point(511.0, 1.0)),
-             Line(Point(511.0, 511.0), Point(1.0, 511.0))]
+    white = 50.0
+    lines = [Line(Point(white, white), Point(white, height - white)),
+             Line(Point(white, white), Point(width - white, white)),
+             Line(Point(width - white, height - white), Point(width - white, white)),
+             Line(Point(width - white, height - white), Point(white, height - white))]
     p = JPGPainter(img)
     for l in lines:
         p.draw(l)
-    p.draw(Diamond(Point(256.0, 256.0), 200.0, 16))
+    p.draw(Diamond(Point(center[0], center[1]), min(width, height) / 2, 16, lambda t: [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]))
 
 
 def prompt() -> None:
@@ -27,11 +30,10 @@ def prompt() -> None:
         os.mkdir("test")
 
     # JPGPainter
-    width, height = 512, 512
     img = Image.new("RGB", (width + 1, height + 1), "white")
     draw(img)
-    img.save(filename + ".jpg")
-    os.startfile(filename + ".jpg")
+    img.save(filename + ".bmp")
+    os.startfile(filename + ".bmp")
 
 if __name__ == "__main__":
     prompt()
