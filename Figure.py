@@ -25,10 +25,9 @@ class Point(Figure):
         """ selfとbをr:(1-r)に内分する点を返す(0<r<1) """
         # r = 0 で self
         # r = 1 で b
-        x = (b.x - self.x) * r + self.x
-        y = (b.y - self.y) * r + self.y
-        rgb = [(x - y) * r + y for x, y in zip(b.rgb, self.rgb)]
-        return Point(x, y, rgb)
+        return Point((b.x - self.x) * r + self.x,
+                     (b.y - self.y) * r + self.y,
+                     [(x - y) * r + y for x, y in zip(b.rgb, self.rgb)])
 
 
 class Line(Figure):
