@@ -1,6 +1,8 @@
 from itertools import chain
 from math import ceil, pi, sin, cos
 
+scale = 1.0
+
 
 class Figure(object):
     """ 図形の基底クラス """
@@ -9,8 +11,11 @@ class Figure(object):
         pass
 
 
-class Point(Figure):
-    """ 図形を扱うときの基本となる点 """
+class _Point(Figure):
+    """
+    scaleを気にしない普通の点
+    他のFigureが点を使うときはこちらを使う
+    """
 
     def __init__(self, x, y, rgb=(0, 0, 0)):
         """ 座標が(x,y)で色がrgbの点を返す """
@@ -19,15 +24,27 @@ class Point(Figure):
         self.rgb = [int(x) for x in rgb]
 
     def __repr__(self):
-        return "Point(%s, %s, %s)" % (self.x, self.y, self.rgb)
+        return "_Point(%s, %s, %s)" % (self.x, self.y, self.rgb)
 
     def interpolate(self, b, r):
         """ selfとbをr:(1-r)に内分する点を返す(0<r<1) """
         # r = 0 で self
         # r = 1 で b
-        return Point((b.x - self.x) * r + self.x,
-                     (b.y - self.y) * r + self.y,
-                     [(x - y) * r + y for x, y in zip(b.rgb, self.rgb)])
+        return _Point((b.x - self.x) * r + self.x,
+                      (b.y - self.y) * r + self.y,
+                      [(x - y) * r + y for x, y in zip(b.rgb, self.rgb)])
+
+
+class Point(_Point):
+    """
+    Figure.scaleを気にする点
+    ユーザーがプログラムで使うのはこっち
+    ユーザーがFigure.scaleを適宜変更することで、扱いやすい座標系([0.0, 1.0]^2など)で図形を描くことが可能になる
+    """
+
+    def __init__(self, x, y, rgb=(0, 0, 0)):
+        """ 座標が(scale * x, scale * y)で色がrgbの点を返す """
+        super().__init__(scale * x, scale * y, rgb)
 
 
 class Line(Figure):
@@ -45,7 +62,7 @@ class Line(Figure):
         if self.stopper == 0:
             return (i for i in range(0))
         else:
-            return (Point.interpolate(self.a, self.b, i / self.stopper) for i in range(int(self.stopper) + 1))
+            return (_Point.interpolate(self.a, self.b, i / self.stopper) for i in range(int(self.stopper) + 1))
 
 
 class Polygon(Figure):
@@ -73,21 +90,21 @@ class Ellipse(Figure):
         self.x = lambda y: a * (1 - (y / b) ** 2) ** 0.5
 
     def __iter__(self):
-        return chain((Point(self.center.x + x,
-                            self.center.y + self.y(x),
-                            self.center.rgb)
+        return chain((_Point(self.center.x + x,
+                             self.center.y + self.y(x),
+                             self.center.rgb)
                       for x in range(-self.x_range, self.x_range)),
-                     (Point(self.center.x + x,
-                            self.center.y - self.y(x),
-                            self.center.rgb)
+                     (_Point(self.center.x + x,
+                             self.center.y - self.y(x),
+                             self.center.rgb)
                       for x in range(-self.x_range, self.x_range)),
-                     (Point(self.center.x + self.x(y),
-                            self.center.y + y,
-                            self.center.rgb)
+                     (_Point(self.center.x + self.x(y),
+                             self.center.y + y,
+                             self.center.rgb)
                       for y in range(-self.y_range, self.y_range)),
-                     (Point(self.center.x - self.x(y),
-                            self.center.y + y,
-                            self.center.rgb)
+                     (_Point(self.center.x - self.x(y),
+                             self.center.y + y,
+                             self.center.rgb)
                       for y in range(-self.y_range, self.y_range)))
 
 
@@ -117,7 +134,7 @@ class ColorArray(Figure, list):
         for y in range(height):
             array.append(ColorArray(0, 0))
             for x in range(width):
-                array[-1].append(Point(x, y, [255, 255, 255]))
+                array[-1].append(_Point(x, y, [255, 255, 255]))
         super().__init__(array)
 
     def __iter__(self):
@@ -158,7 +175,7 @@ class ColorArray(Figure, list):
             x = m = 0
             array.append(ColorArray(0, 0))
             while x <= source_width:
-                array[-1].append(Point(m, n, list(sampler(x, y))))
+                array[-1].append(_Point(m, n, list(sampler(x, y))))
                 x += diff_x
                 m += 1
             y += diff_y
@@ -168,6 +185,6 @@ class ColorArray(Figure, list):
 
 def circular_points(center, r, n, color=lambda t: [0, 0, 0]):
     """ 円周上の点へのイテレータを返す """
-    return (Point(r * cos(2 * pi * i / n) + center.x,
-                  r * sin(2 * pi * i / n) + center.y,
-                  color(i / n)) for i in range(n))
+    return (_Point(r * cos(2 * pi * i / n) + center.x,
+                   r * sin(2 * pi * i / n) + center.y,
+                   color(i / n)) for i in range(n))
