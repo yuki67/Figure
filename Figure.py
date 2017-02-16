@@ -10,6 +10,9 @@ class Figure(object):
     def __iter__(self):
         pass
 
+    def scaled(self):
+        pass
+
 
 class _Point(Figure):
     """
@@ -33,6 +36,9 @@ class _Point(Figure):
         return _Point((b.x - self.x) * r + self.x,
                       (b.y - self.y) * r + self.y,
                       [(x - y) * r + y for x, y in zip(b.rgb, self.rgb)])
+
+    def scaled(self, factor):
+        return _Point(self.x * factor, self.y * factor, self.rgb)
 
 
 class Point(_Point):
@@ -64,6 +70,9 @@ class Line(Figure):
         else:
             return (_Point.interpolate(self.a, self.b, i / self.stopper) for i in range(int(self.stopper) + 1))
 
+    def scaled(self, factor):
+        return Line(self.a.scaled(factor), self.b.scaled(factor))
+
 
 class Polygon(Figure):
     """ 多角形 """
@@ -74,6 +83,12 @@ class Polygon(Figure):
 
     def __iter__(self):
         return (Line(self.points[i - 1], self.points[i]) for i in range(self.stopper))
+
+    def scaled(self, factor):
+        return Polygon([p.scaled(factor) for p in self.points])
+
+    def __repr__(self):
+        return "Polygon(%s)" % str(self.points)
 
 
 class Ellipse(Figure):
@@ -181,6 +196,24 @@ class ColorArray(Figure, list):
             y += diff_y
             n += 1
         return array
+
+
+class Fractal(Figure):
+    """ フラクタル """
+
+    def __init__(self, initiator, generator, n):
+        self.initiator = initiator
+        self.generator = generator
+        self.n = n
+
+    def __iter__(self):
+        if self.n == 0:
+            return (self.initiator for i in range(1))
+        else:
+            return (Fractal(self.initiator.scaled(factor), self.generator, self.n - 1) for factor in self.generator)
+
+    def __repr__(self):
+        return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
 
 
 def circular_points(center, r, n, color=lambda t: [0, 0, 0]):
