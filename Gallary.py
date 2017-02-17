@@ -75,6 +75,15 @@ class JumpRope(Circloid):
         super().__init__(circle, n, f)
 
 
+class Flower(Circloid):
+    """ 花を真上から見たのに似てる """
+
+    def __init__(self, circle, n=128, k=8):
+        def f(i, j):
+            return i < j and (i + j) % (self.n // k) == 0
+        super().__init__(circle, n, f)
+
+
 def demo():
     width, height = 1024, 1024
     Figure.transform = Matrix.scale2D(width, height)
@@ -87,6 +96,7 @@ def demo():
         [Waves, [circle, 256]],
         [PineCone, [circle, 128]],
         [JumpRope, [circle, 256]],
+        [Flower, [circle, 256, 8]],
     ]
 
     for exhibit, args in exhibits:
