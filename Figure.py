@@ -113,6 +113,9 @@ class Ellipse():
                              self.center.rgb)
                       for y in range(-self.y_range, self.y_range)))
 
+    def transformed(self, mat):
+        return Ellipse(self.center.transformed(mat), self.a, self.b)
+
 
 class Circle(Ellipse):
     """ 円 """
