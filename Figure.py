@@ -82,7 +82,7 @@ class Polygon():
         return "Polygon(%s)" % str(self.points)
 
 
-class Ellipse():
+class _Ellipse():
     """ 楕円 """
 
     def __init__(self, center, a, b):
@@ -114,21 +114,37 @@ class Ellipse():
                       for y in range(-self.y_range, self.y_range)))
 
     def transformed(self, mat):
-        return Ellipse(self.center.transformed(mat), self.a, self.b)
+        return _Ellipse(self.center.transformed(mat), self.a, self.b)
 
 
-class Circle(Ellipse):
+class Ellipse(_Ellipse):
+
+    def __init__(self, center, a, b):
+        super().__init__(center,
+                         a * transform[0][0],
+                         b * transform[0][0])
+
+
+class _Circle(_Ellipse):
     """ 円 """
 
     def __init__(self, center, r):
         super().__init__(center, r, r)
 
 
+class Circle(_Circle):
+
+    def __init__(self, center, r):
+        print(center)
+        super().__init__(center,
+                         r * transform[0][0])
+
+
 class Diamond():
     """ ダイヤモンドパターン """
 
     def __init__(self, center, r, n, color=lambda t: [0, 0, 0]):
-        self.circle = lambda: circular_points(center, r, n, color)
+        self.circle = lambda: _circular_points(center, r, n, color)
 
     def __iter__(self):
         return (Line(p, q) for p in self.circle() for q in self.circle())
@@ -210,8 +226,16 @@ class Fractal():
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
 
 
+def _circular_points(center, r, n, color=lambda t: [0, 0, 0]):
+    """ 円周上の点へのイテレータを返す """
+    return (_Point([r * cos(2 * pi * i / n) + center.pos[0],
+                    r * sin(2 * pi * i / n) + center.pos[1]],
+                   color(i / n)) for i in range(n))
+
+
 def circular_points(center, r, n, color=lambda t: [0, 0, 0]):
     """ 円周上の点へのイテレータを返す """
+    r *= transform[0][0]
     return (_Point([r * cos(2 * pi * i / n) + center.pos[0],
                     r * sin(2 * pi * i / n) + center.pos[1]],
                    color(i / n)) for i in range(n))

@@ -1,5 +1,5 @@
 from PIL import ImageDraw
-from Figure import _Point
+from Figure import _Point, Line
 
 
 class JPGPainter(object):
@@ -15,6 +15,10 @@ class JPGPainter(object):
             self.canvas.putpixel((int(point.pos[0]), int(point.pos[1])),
                                  tuple(point.rgb))
 
+    def draw_line(self, line):
+        """ canvasにlineを描画する """
+        self.drawer.line([*line.a.pos[:2], *line.b.pos[:2]], fill="black")
+
     def split_and_draw(self, figure):
         """ figureを分解して描く """
         for sub_figure in figure:
@@ -24,5 +28,7 @@ class JPGPainter(object):
         """ canvasにfigureを描く """
         if isinstance(figure, _Point):
             self.put_pixel(figure)
+        elif isinstance(figure, Line):
+            self.draw_line(figure)
         else:
             self.split_and_draw(figure)
