@@ -6,9 +6,6 @@ class JPGPainter(object):
     """ PillowのImage用のPainter """
 
     def __init__(self, img):
-        self.draw_functions = {
-            _Point: self.put_pixel
-        }
         self.canvas = img
         self.drawer = ImageDraw.Draw(img)
 
