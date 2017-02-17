@@ -135,19 +135,13 @@ class _Circle(_Ellipse):
 class Circle(_Circle):
 
     def __init__(self, center, r):
-        print(center)
         super().__init__(center,
                          r * transform[0][0])
 
-
-class Diamond():
-    """ ダイヤモンドパターン """
-
-    def __init__(self, center, r, n, color=lambda t: [0, 0, 0]):
-        self.circle = lambda: _circular_points(center, r, n, color)
-
-    def __iter__(self):
-        return (Line(p, q) for p in self.circle() for q in self.circle())
+    def points(self, n):
+        return [_Point([self.a * cos(2 * pi * i / n) + self.center.pos[0],
+                        self.a * sin(2 * pi * i / n) + self.center.pos[1]],
+                       self.center.rgb) for i in range(n)]
 
 
 class ColorArray(list):
@@ -224,18 +218,3 @@ class Fractal():
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
-
-
-def _circular_points(center, r, n, color=lambda t: [0, 0, 0]):
-    """ 円周上の点へのイテレータを返す """
-    return (_Point([r * cos(2 * pi * i / n) + center.pos[0],
-                    r * sin(2 * pi * i / n) + center.pos[1]],
-                   color(i / n)) for i in range(n))
-
-
-def circular_points(center, r, n, color=lambda t: [0, 0, 0]):
-    """ 円周上の点へのイテレータを返す """
-    r *= transform[0][0]
-    return (_Point([r * cos(2 * pi * i / n) + center.pos[0],
-                    r * sin(2 * pi * i / n) + center.pos[1]],
-                   color(i / n)) for i in range(n))
