@@ -14,8 +14,8 @@ class JPGPainter(object):
 
     def put_pixel(self, point):
         """ canvasにpointを描画する """
-        if 0 <= point.x < self.canvas.width and 0 <= point.y < self.canvas.height:
-            self.canvas.putpixel((int(point.x), int(point.y)),
+        if 0 <= point.pos[0] < self.canvas.width and 0 <= point.pos[1] < self.canvas.height:
+            self.canvas.putpixel((int(point.pos[0]), int(point.pos[1])),
                                  tuple(point.rgb))
 
     def split_and_draw(self, figure):

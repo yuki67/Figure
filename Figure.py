@@ -1,44 +1,35 @@
 from itertools import chain
 from math import ceil, pi, sin, cos
+from MyMatrix import Matrix, Vector
 
-scale = 1.0
-
-
-class Figure(object):
-    """ 図形の基底クラス """
-
-    def __iter__(self):
-        pass
-
-    def scaled(self):
-        pass
+transform = Matrix.identity(3)
 
 
-class _Point(Figure):
+class _Point(object):
     """
     scaleを気にしない普通の点
     他のFigureが点を使うときはこちらを使う
     """
 
-    def __init__(self, x, y, rgb=(0, 0, 0)):
+    def __init__(self, pos, rgb=(0, 0, 0)):
         """ 座標が(x,y)で色がrgbの点を返す """
-        self.x = x
-        self.y = y
-        self.rgb = [int(x) for x in rgb]
+        if len(pos) == 2:
+            pos += [1.0]
+        self.pos = Vector(pos)
+        self.rgb = Vector([int(x) for x in rgb])
 
     def __repr__(self):
-        return "_Point(%s, %s, %s)" % (self.x, self.y, self.rgb)
+        return "_Point(%s, %s)" % (self.pos, self.rgb)
 
     def interpolate(self, b, r):
         """ selfとbをr:(1-r)に内分する点を返す(0<r<1) """
         # r = 0 で self
         # r = 1 で b
-        return _Point((b.x - self.x) * r + self.x,
-                      (b.y - self.y) * r + self.y,
-                      [(x - y) * r + y for x, y in zip(b.rgb, self.rgb)])
+        return _Point((b.pos - self.pos).scale(r) + self.pos,
+                      (b.rgb - self.rgb).scale(r) + self.rgb)
 
-    def scaled(self, factor):
-        return _Point(self.x * factor, self.y * factor, self.rgb)
+    def transformed(self, mat):
+        return _Point(self.pos * mat, self.rgb)
 
 
 class Point(_Point):
@@ -50,16 +41,16 @@ class Point(_Point):
 
     def __init__(self, x, y, rgb=(0, 0, 0)):
         """ 座標が(scale * x, scale * y)で色がrgbの点を返す """
-        super().__init__(scale * x, scale * y, rgb)
+        super().__init__(Vector([x, y, 1.0]) * transform, rgb)
 
 
-class Line(Figure):
+class Line():
     """ 線分 """
 
     def __init__(self, a, b):
         self.a = a
         self.b = b
-        self.stopper = max(abs(self.a.x - self.b.x), abs(self.a.y - self.b.y))
+        self.stopper = max(abs(self.a.pos[0] - self.b.pos[0]), abs(self.a.pos[1] - self.b.pos[1]))
 
     def __repr__(self):
         return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
@@ -70,11 +61,11 @@ class Line(Figure):
         else:
             return (_Point.interpolate(self.a, self.b, i / self.stopper) for i in range(int(self.stopper) + 1))
 
-    def scaled(self, factor):
-        return Line(self.a.scaled(factor), self.b.scaled(factor))
+    def transformed(self, mat):
+        return Line(self.a.transformed(mat), self.b.transformed(mat))
 
 
-class Polygon(Figure):
+class Polygon():
     """ 多角形 """
 
     def __init__(self, points):
@@ -84,14 +75,14 @@ class Polygon(Figure):
     def __iter__(self):
         return (Line(self.points[i - 1], self.points[i]) for i in range(self.stopper))
 
-    def scaled(self, factor):
-        return Polygon([p.scaled(factor) for p in self.points])
+    def transformed(self, mat):
+        return Polygon([p.transformed(mat) for p in self.points])
 
     def __repr__(self):
         return "Polygon(%s)" % str(self.points)
 
 
-class Ellipse(Figure):
+class Ellipse():
     """ 楕円 """
 
     def __init__(self, center, a, b):
@@ -101,24 +92,24 @@ class Ellipse(Figure):
         self.b = b
         self.x_range = ceil((a ** 2 + b ** 2) ** -0.5 * a ** 2)
         self.y_range = ceil((a ** 2 + b ** 2) ** -0.5 * b ** 2)
-        self.y = lambda x: b * (1 - (x / a) ** 2) ** 0.5
-        self.x = lambda y: a * (1 - (y / b) ** 2) ** 0.5
+        self.x = lambda x: b * (1 - (x / a) ** 2) ** 0.5
+        self.y = lambda y: a * (1 - (y / b) ** 2) ** 0.5
 
     def __iter__(self):
-        return chain((_Point(self.center.x + x,
-                             self.center.y + self.y(x),
+        return chain((_Point([self.center.pos[0] + x,
+                              self.center.pos[1] + self.y(x)],
                              self.center.rgb)
                       for x in range(-self.x_range, self.x_range)),
-                     (_Point(self.center.x + x,
-                             self.center.y - self.y(x),
+                     (_Point([self.center.pos[0] + x,
+                              self.center.pos[1] - self.y(x)],
                              self.center.rgb)
                       for x in range(-self.x_range, self.x_range)),
-                     (_Point(self.center.x + self.x(y),
-                             self.center.y + y,
+                     (_Point([self.center.pos[0] + self.x(y),
+                              self.center.pos[1] + y],
                              self.center.rgb)
                       for y in range(-self.y_range, self.y_range)),
-                     (_Point(self.center.x - self.x(y),
-                             self.center.y + y,
+                     (_Point([self.center.pos[0] - self.x(y),
+                              self.center.pos[1] + y],
                              self.center.rgb)
                       for y in range(-self.y_range, self.y_range)))
 
@@ -130,7 +121,7 @@ class Circle(Ellipse):
         super().__init__(center, r, r)
 
 
-class Diamond(Figure):
+class Diamond():
     """ ダイヤモンドパターン """
 
     def __init__(self, center, r, n, color=lambda t: [0, 0, 0]):
@@ -140,7 +131,7 @@ class Diamond(Figure):
         return (Line(p, q) for p in self.circle() for q in self.circle())
 
 
-class ColorArray(Figure, list):
+class ColorArray(list):
     """ 色配列 """
 
     def __init__(self, width, height):
@@ -149,7 +140,7 @@ class ColorArray(Figure, list):
         for y in range(height):
             array.append(ColorArray(0, 0))
             for x in range(width):
-                array[-1].append(_Point(x, y, [255, 255, 255]))
+                array[-1].append(_Point([x, y], [255, 255, 255]))
         super().__init__(array)
 
     def __iter__(self):
@@ -190,7 +181,7 @@ class ColorArray(Figure, list):
             x = m = 0
             array.append(ColorArray(0, 0))
             while x <= source_width:
-                array[-1].append(_Point(m, n, list(sampler(x, y))))
+                array[-1].append(_Point([m, n], list(sampler(x, y))))
                 x += diff_x
                 m += 1
             y += diff_y
@@ -198,7 +189,7 @@ class ColorArray(Figure, list):
         return array
 
 
-class Fractal(Figure):
+class Fractal():
     """ フラクタル """
 
     def __init__(self, initiator, generator, n):
@@ -210,7 +201,7 @@ class Fractal(Figure):
         if self.n == 0:
             return (self.initiator for i in range(1))
         else:
-            return (Fractal(self.initiator.scaled(factor), self.generator, self.n - 1) for factor in self.generator)
+            return (Fractal(self.initiator.transformed(mat), self.generator, self.n - 1) for mat in self.generator)
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
@@ -218,6 +209,6 @@ class Fractal(Figure):
 
 def circular_points(center, r, n, color=lambda t: [0, 0, 0]):
     """ 円周上の点へのイテレータを返す """
-    return (_Point(r * cos(2 * pi * i / n) + center.x,
-                   r * sin(2 * pi * i / n) + center.y,
+    return (_Point([r * cos(2 * pi * i / n) + center.pos[0],
+                    r * sin(2 * pi * i / n) + center.pos[1]],
                    color(i / n)) for i in range(n))
