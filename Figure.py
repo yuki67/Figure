@@ -28,6 +28,9 @@ class _Point(object):
         return _Point((b.pos - self.pos).scale(r) + self.pos,
                       (b.rgb - self.rgb).scale(r) + self.rgb)
 
+    def points(self):
+        return self.pos
+
     def transformed(self, mat):
         return _Point(self.pos * mat, self.rgb)
 
