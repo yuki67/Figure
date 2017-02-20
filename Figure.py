@@ -205,16 +205,20 @@ class ColorArray(list):
 class Fractal():
     """ フラクタル """
 
-    def __init__(self, initiator, generator, n):
+    def __init__(self, initiator, generator, n, each=False):
         self.initiator = initiator
         self.generator = generator
         self.n = n
+        self.each = each
 
     def __iter__(self):
         if self.n == 0:
-            return (self.initiator for i in range(1))
-        else:
-            return (Fractal(self.initiator.transformed(mat), self.generator, self.n - 1) for mat in self.generator)
+            yield self.initiator
+            raise StopIteration
+        elif self.each:
+            yield self.initiator
+        for mat in self.generator:
+            yield Fractal(self.initiator.transformed(mat), self.generator, self.n - 1, self.each)
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
