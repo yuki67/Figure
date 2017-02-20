@@ -13,11 +13,11 @@ class JPGPainter(object):
         """ canvasにpointを描画する """
         if 0 <= point.pos[0] < self.canvas.width and 0 <= point.pos[1] < self.canvas.height:
             self.canvas.putpixel((int(point.pos[0]), int(point.pos[1])),
-                                 tuple(point.rgb))
+                                 (0.0, 0.0, 0.0))
 
     def draw_line(self, line):
         """ canvasにlineを描画する """
-        self.drawer.line([*line.a.pos[:2], *line.b.pos[:2]], fill="black")
+        self.drawer.line([*line.a[:2], *line.b[:2]], fill="black")
 
     def split_and_draw(self, figure):
         """ figureを分解して描く """

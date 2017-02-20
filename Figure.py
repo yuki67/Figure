@@ -5,34 +5,29 @@ from MyMatrix import Matrix, Vector
 transform = Matrix.identity(3)
 
 
-class _Point(object):
+class _Point(Vector):
     """
-    scaleを気にしない普通の点
+    transformを気にしない普通の点
     他のFigureが点を使うときはこちらを使う
     """
 
-    def __init__(self, pos, rgb=(0, 0, 0)):
-        """ 座標が(x,y)で色がrgbの点を返す """
+    def __init__(self, pos):
+        """ 座標が(x,y)の点を返す """
         if len(pos) == 2:
             pos += [1.0]
-        self.pos = Vector(pos)
-        self.rgb = Vector([int(x) for x in rgb])
+        super().__init__(pos)
 
     def __repr__(self):
-        return "_Point(%s, %s)" % (self.pos, self.rgb)
+        return "_Point(%s, %s)" % str(list(self))
 
     def interpolate(self, b, r):
         """ selfとbをr:(1-r)に内分する点を返す(0<r<1) """
         # r = 0 で self
         # r = 1 で b
-        return _Point((b.pos - self.pos).scale(r) + self.pos,
-                      (b.rgb - self.rgb).scale(r) + self.rgb)
-
-    def points(self):
-        return self.pos
+        return _Point((b - self).scale(r) + self)
 
     def transformed(self, mat):
-        return _Point(self.pos * mat, self.rgb)
+        return _Point(self * mat)
 
 
 class Point(_Point):
@@ -42,9 +37,9 @@ class Point(_Point):
     ユーザーがFigure.scaleを適宜変更することで、扱いやすい座標系([0.0, 1.0]^2など)で図形を描くことが可能になる
     """
 
-    def __init__(self, x, y, rgb=(0, 0, 0)):
-        """ 座標が(scale * x, scale * y)で色がrgbの点を返す """
-        super().__init__(Vector([x, y, 1.0]) * transform, rgb)
+    def __init__(self, x, y):
+        """ 座標が(scale * x, scale * y)の点を返す """
+        super().__init__(Vector([x, y, 1.0]) * transform)
 
 
 class Line():
@@ -53,7 +48,7 @@ class Line():
     def __init__(self, a, b):
         self.a = a
         self.b = b
-        self.stopper = max(abs(self.a.pos[0] - self.b.pos[0]), abs(self.a.pos[1] - self.b.pos[1]))
+        self.stopper = max(abs(self.a[0] - self.b[0]), abs(self.a[1] - self.b[1]))
 
     def __repr__(self):
         return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
@@ -63,6 +58,9 @@ class Line():
             return (i for i in range(0))
         else:
             return (_Point.interpolate(self.a, self.b, i / self.stopper) for i in range(int(self.stopper) + 1))
+
+    def mid(self):
+        return [a / 2 for a in self.a + self.b]
 
     def transformed(self, mat):
         return Line(self.a.transformed(mat), self.b.transformed(mat))
@@ -89,7 +87,6 @@ class _Ellipse():
     """ 楕円 """
 
     def __init__(self, center, a, b):
-        # 全体の色はcenter.rgbで指定される
         self.center = center
         self.a = a
         self.b = b
@@ -99,21 +96,17 @@ class _Ellipse():
         self.y = lambda y: a * (1 - (y / b) ** 2) ** 0.5
 
     def __iter__(self):
-        return chain((_Point([self.center.pos[0] + x,
-                              self.center.pos[1] + self.y(x)],
-                             self.center.rgb)
+        return chain((_Point([self.center[0] + x,
+                              self.center[1] + self.y(x)])
                       for x in range(-self.x_range, self.x_range)),
-                     (_Point([self.center.pos[0] + x,
-                              self.center.pos[1] - self.y(x)],
-                             self.center.rgb)
+                     (_Point([self.center[0] + x,
+                              self.center[1] - self.y(x)])
                       for x in range(-self.x_range, self.x_range)),
-                     (_Point([self.center.pos[0] + self.x(y),
-                              self.center.pos[1] + y],
-                             self.center.rgb)
+                     (_Point([self.center[0] + self.x(y),
+                              self.center[1] + y])
                       for y in range(-self.y_range, self.y_range)),
-                     (_Point([self.center.pos[0] - self.x(y),
-                              self.center.pos[1] + y],
-                             self.center.rgb)
+                     (_Point([self.center[0] - self.x(y),
+                              self.center[1] + y])
                       for y in range(-self.y_range, self.y_range)))
 
     def transformed(self, mat):
@@ -142,67 +135,8 @@ class Circle(_Circle):
                          r * transform[0][0])
 
     def points(self, n):
-        return [_Point([self.a * cos(2 * pi * i / n) + self.center.pos[0],
-                        self.a * sin(2 * pi * i / n) + self.center.pos[1]],
-                       self.center.rgb) for i in range(n)]
-
-
-class ColorArray(list):
-    """ 色配列 """
-
-    def __init__(self, width, height):
-        """ [255, 255, 255](白)に初期化された横width, 縦heightの色配列を返す """
-        array = []
-        for y in range(height):
-            array.append(ColorArray(0, 0))
-            for x in range(width):
-                array[-1].append(_Point([x, y], [255, 255, 255]))
-        super().__init__(array)
-
-    def __iter__(self):
-        return list.__iter__(self)
-
-    def resize(self, width: int):
-        """ 幅をwidthに縮小して返す """
-        return self.from_source(width,
-                                len(self[0]), len(self),
-                                lambda x, y: self[int(y)][int(x)].rgb)
-
-    @staticmethod
-    def from_image(filename, width):
-        """
-        画像から色配列を作って返す
-        widthは出来上がる色配列の幅
-        """
-        from PIL import Image
-
-        image = Image.open(filename)
-        w, h = image.size
-        return ColorArray.from_source(width, w, h,
-                                      lambda x, y: image.getpixel((int(x), int(y))))
-
-    @staticmethod
-    def from_source(width: int,
-                    source_width,
-                    source_height,
-                    sampler):
-        """ samplerを使って幅widthの色配列を作って返す """
-        height = width / source_width * source_height
-        diff_x = (source_width - 1) / (width - 1)
-        diff_y = (source_height - 1) / (height - 1)
-
-        y = n = 0
-        array = ColorArray(0, 0)
-        while y <= source_height:
-            x = m = 0
-            array.append(ColorArray(0, 0))
-            while x <= source_width:
-                array[-1].append(_Point([m, n], list(sampler(x, y))))
-                x += diff_x
-                m += 1
-            y += diff_y
-            n += 1
-        return array
+        return [_Point([self.a * cos(2 * pi * i / n) + self.center[0],
+                        self.a * sin(2 * pi * i / n) + self.center[1]]) for i in range(n)]
 
 
 class Fractal():
