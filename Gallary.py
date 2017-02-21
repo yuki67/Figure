@@ -17,7 +17,7 @@ class Circloid(object):
         self.f = f
 
     def __iter__(self):
-        points = self.circle.points(self.n)
+        points = self.circle.circle_points(self.n)
         for i in range(self.n):
             for j in range(self.n):
                 if self.f(i, j):
@@ -76,20 +76,6 @@ class JumpRope(Circloid):
         super().__init__(circle, n, f)
 
 
-class KochCurve(Fractal):
-    """ コッホ曲線 """
-
-    def __init__(self, line, n, each):
-        args = [
-            [line.a, 0.0, [1 / 3, 1 / 3], [0.0, 0.0]],
-            [line.a, pi / 3, [1 / 3, 1 / 3], Point.interpolate(Point(0.0, 0.0), line.b - line.a, 1 / 3)],
-            [line.b, -pi / 3, [1 / 3, 1 / 3], Point.interpolate(Point(0.0, 0.0), line.a - line.b, 1 / 3)],
-            [line.b, 0.0, [1 / 3, 1 / 3], [0.0, 0.0]],
-        ]
-        generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
-        super().__init__(line, generator, n, each)
-
-
 class Flower(Circloid):
     """ 花を真上から見たのに似てる """
 
@@ -99,12 +85,38 @@ class Flower(Circloid):
         super().__init__(circle, n, f)
 
 
+class KochCurve(Fractal):
+    """ コッホ曲線 """
+
+    def __init__(self, line, n, each):
+        args = [
+            [line.a, 0.0, [1 / 3, 1 / 3], Point([0.0, 0.0])],
+            [line.a, -pi / 3, [1 / 3, 1 / 3], Point.interpolate(Point([0.0, 0.0]), line.b - line.a, 1 / 3)],
+            [line.b, pi / 3, [1 / 3, 1 / 3], Point.interpolate(Point([0.0, 0.0]), line.a - line.b, 1 / 3)],
+            [line.b, 0.0, [1 / 3, 1 / 3], Point([0.0, 0.0])],
+        ]
+        generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
+        super().__init__(line, generator, n, each)
+
+
+class SierpiskiGasket(Fractal):
+    """ シェルピンスキーのギャスケット """
+
+    def __init__(self, points, n, each):
+        center = sum(points, Point([0.0, 0.0])).scale(1 / len(points))
+        args = [
+            [center, 0.0, [0.5, 0.5], Point.interpolate(Point([0.0, 0.0]), p - center, 0.5)] for p in points
+        ]
+        generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
+        super().__init__(Polygon(points), generator, n, each)
+
+
 def demo():
     width, height = 1024, 1024
     Figure.transform = Matrix.scale2D(width, height)
 
-    circle = Circle(Point(0.5, 0.5), 0.5)
-    line = Line(Point(0.1, 0.1), Point(0.9, 0.9))
+    circle = Circle(Point([0.5, 0.5]), 0.5)
+    line = Line(Point([0.1, 0.1]), Point([0.9, 0.9]))
     exhibits = [
         [Diamond, [circle, 32]],
         [Cardioid, [circle, 256]],
@@ -113,7 +125,8 @@ def demo():
         [PineCone, [circle, 128]],
         [JumpRope, [circle, 256]],
         [Flower, [circle, 256, 8]],
-        [KochCurve, [line, 5, False]]
+        [KochCurve, [line, 6, False]],
+        [SierpiskiGasket, [circle.circle_points(3, True), 7, False]]
     ]
 
     for exhibit, args in exhibits:
