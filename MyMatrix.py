@@ -53,35 +53,3 @@ class Matrix(list):
             Matrix.scale2D(scale[0], scale[1]) * \
             Matrix.trans2D(trans[0], trans[1]) * \
             Matrix.trans2D(center[0], center[1])
-
-
-class Vector(list):
-
-    def __add__(self, other):
-        return Vector([a + b for a, b in zip(self, other)])
-
-    def __sub__(self, other):
-        return Vector([a - b for a, b in zip(self, other)])
-
-    def __mul__(self, other):
-        return Vector([sum([self[j] * other[j][i] for j in range(len(other[i]))]) for i in range(len(other))])
-
-    def __repr__(self):
-        return "Vector(%s)" % list.__str__(list(self))
-
-    def scale(self, r):
-        return Vector([r * x for x in self])
-
-    def norm(self):
-        return (sum([a ** 2 for a in self]))**0.5
-
-    def dot(self, other):
-        return sum([a * b for a, b in zip(self, other)])
-
-    def costheta(self, b):
-        return self.dot(b) / (self.norm() * b.norm())
-
-
-if __name__ == "__main__":
-    import MyMatrixTest
-    MyMatrixTest.start_test()

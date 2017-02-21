@@ -1,30 +1,38 @@
 from itertools import chain
 from math import ceil, pi, sin, cos
-from MyMatrix import Matrix, Vector
+from MyMatrix import Matrix
 
 transform = Matrix.identity(3)
 
 
-class _Point(Vector):
+class _Point(list):
     """
     transformを気にしない普通の点
     他のFigureが点を使うときはこちらを使う
     """
 
-    def __init__(self, pos):
-        """ 座標が(x,y)の点を返す """
-        if len(pos) == 2:
-            pos += [1.0]
-        super().__init__(pos)
-
     def __repr__(self):
-        return "_Point(%s, %s)" % str(list(self))
+        return "_Point(%s)" % str(list(self))
 
     def interpolate(self, b, r):
-        """ selfとbをr:(1-r)に内分する点を返す(0<r<1) """
-        # r = 0 で self
-        # r = 1 で b
+        """
+        selfとbをr:(1-r)に内分する点を返す(0<r<1)
+        r = 0 で self
+        r = 1 で b
+        """
         return _Point((b - self).scale(r) + self)
+
+    def __add__(self, other):
+        return _Point([a + b for a, b in zip(self, other)])
+
+    def __sub__(self, other):
+        return _Point([a - b for a, b in zip(self, other)])
+
+    def __mul__(self, other):
+        return _Point([sum([self[j] * other[j][i] for j in range(len(other[i]))]) for i in range(len(other))])
+
+    def scale(self, r):
+        return _Point([r * x for x in self])
 
     def transformed(self, mat):
         return _Point(self * mat)
@@ -37,9 +45,11 @@ class Point(_Point):
     ユーザーがFigure.scaleを適宜変更することで、扱いやすい座標系([0.0, 1.0]^2など)で図形を描くことが可能になる
     """
 
-    def __init__(self, x, y):
+    def __init__(self, pos):
         """ 座標が(scale * x, scale * y)の点を返す """
-        super().__init__(Vector([x, y, 1.0]) * transform)
+        if len(pos) != 2:
+            return None
+        super().__init__(_Point(pos + [1.0]) * transform)
 
 
 class Line():
