@@ -13,8 +13,8 @@ class Figure(object):
     def __iter__(self):
         return self.iter
 
-    def points(self, n):
-        return list(self.__iter__)
+    def points(self):
+        return list(self)
 
     def transformed(self, mat):
         return Figure((x.transformed(mat) for x in self))
@@ -143,7 +143,7 @@ class Circle(_Circle):
         super().__init__(center,
                          r * transform[0][0])
 
-    def points(self, n, stand=False):
+    def circle_points(self, n, stand=False):
         if stand:
             return [_Point([self.a * cos(2 * pi * i / n) + self.center[0],
                             self.a * sin(2 * pi * i / n) + self.center[1],
