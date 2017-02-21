@@ -3,7 +3,7 @@ import os
 from math import pi
 from PIL import Image
 import Figure
-from Figure import Line, Point, Fractal, Polygon, Circle, Ellipse
+from Figure import Line, Point, _Point, Fractal, Polygon, Circle, Ellipse
 from JPGPainter import JPGPainter
 from MyMatrix import Matrix
 
@@ -88,12 +88,25 @@ class Flower(Circloid):
 class KochCurve(Fractal):
     """ コッホ曲線 """
 
-    def __init__(self, line, n, each):
+    def __init__(self, line, n, each=True):
         args = [
             [line.a, 0.0, [1 / 3, 1 / 3], Point([0.0, 0.0])],
             [line.a, -pi / 3, [1 / 3, 1 / 3], Point.interpolate(Point([0.0, 0.0]), line.b - line.a, 1 / 3)],
             [line.b, pi / 3, [1 / 3, 1 / 3], Point.interpolate(Point([0.0, 0.0]), line.a - line.b, 1 / 3)],
             [line.b, 0.0, [1 / 3, 1 / 3], Point([0.0, 0.0])],
+        ]
+        generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
+        super().__init__(line, generator, n, each)
+
+
+class DragonCurve(Fractal):
+    """ ドラゴン曲線 """
+
+    def __init__(self, line, n, each=True):
+        r = 2 ** -0.5
+        args = [
+            [line.a, -pi / 4, [r, r], Point([0.0, 0.0])],
+            [line.a, -pi / 4 * 3, [r, r], line.b - line.a],
         ]
         generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
         super().__init__(line, generator, n, each)
@@ -126,7 +139,7 @@ def demo():
 
     circle = Circle(Point([0.5, 0.5]), 0.5)
     ellipse = Ellipse(Point([0.5, 0.5]), 0.5, 0.2)
-    line = Line(Point([0.1, 0.1]), Point([0.9, 0.9]))
+    line = Line(Point([0.05, 0.5]), Point([0.95, 0.5]))
     exhibits = [
         [Diamond, [circle, 32]],
         [Cardioid, [circle, 256]],
@@ -138,6 +151,7 @@ def demo():
         [KochCurve, [line, 6, False]],
         [SierpiskiGasket, [circle.circle_points(3, True), 7, False]],
         [Donuts, [ellipse, 50]],
+        [DragonCurve, [line.transformed(Matrix.affine2D(center=line.mid(), scale=[0.6, 0.6])), 15, False]]
     ]
 
     for exhibit, args in exhibits:
