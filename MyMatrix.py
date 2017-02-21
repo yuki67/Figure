@@ -47,7 +47,7 @@ class Matrix(list):
                        [0.0, 0.0, 1.0]])
 
     @staticmethod
-    def affine2D(center, rot, scale, trans):
+    def affine2D(center=[0.0, 0.0], rot=0.0, scale=[1.0, 1.0], trans=[0.0, 0.0]):
         return Matrix.trans2D(-center[0], -center[1]) * \
             Matrix.rot2D(rot) * \
             Matrix.scale2D(scale[0], scale[1]) * \
