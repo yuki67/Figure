@@ -3,7 +3,7 @@ import os
 from math import pi
 from PIL import Image
 import Figure
-from Figure import Line, Point, Fractal, Polygon, Circle
+from Figure import Line, Point, Fractal, Polygon, Circle, Ellipse
 from JPGPainter import JPGPainter
 from MyMatrix import Matrix
 
@@ -111,11 +111,21 @@ class SierpiskiGasket(Fractal):
         super().__init__(Polygon(points), generator, n, each)
 
 
+class Donuts(Fractal):
+    """ ドーナツ """
+
+    def __init__(self, ellipse, n=50):
+        mat = Matrix.affine2D(center=ellipse.center, rot=pi / n * 2)
+        generator = [mat]
+        super().__init__(ellipse, generator, n, each=True)
+
+
 def demo():
     width, height = 1024, 1024
     Figure.transform = Matrix.scale2D(width, height)
 
     circle = Circle(Point([0.5, 0.5]), 0.5)
+    ellipse = Ellipse(Point([0.5, 0.5]), 0.5, 0.2)
     line = Line(Point([0.1, 0.1]), Point([0.9, 0.9]))
     exhibits = [
         [Diamond, [circle, 32]],
@@ -126,7 +136,8 @@ def demo():
         [JumpRope, [circle, 256]],
         [Flower, [circle, 256, 8]],
         [KochCurve, [line, 6, False]],
-        [SierpiskiGasket, [circle.circle_points(3, True), 7, False]]
+        [SierpiskiGasket, [circle.circle_points(3, True), 7, False]],
+        [Donuts, [ellipse, 50]],
     ]
 
     for exhibit, args in exhibits:
