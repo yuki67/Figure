@@ -85,7 +85,7 @@ class Line(Figure):
             return (_Point.interpolate(self.a, self.b, i / self.max) for i in range(int(self.max) + 1))
 
     def mid(self):
-        return [a / 2 for a in self.a + self.b]
+        return _Point([a / 2 for a in self.a + self.b])
 
     def transformed(self, mat):
         return Line(self.a.transformed(mat), self.b.transformed(mat))
