@@ -49,7 +49,7 @@ class Matrix(list):
     @staticmethod
     def affine2D(center, rot, scale, trans):
         return Matrix.trans2D(-center[0], -center[1]) * \
-            Matrix.rot2D(-rot) * \
+            Matrix.rot2D(rot) * \
             Matrix.scale2D(scale[0], scale[1]) * \
             Matrix.trans2D(trans[0], trans[1]) * \
             Matrix.trans2D(center[0], center[1])
