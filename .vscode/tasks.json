@@ -23,7 +23,7 @@
                 "isBuildCommand": true,
                 "args": [
                     "python",
-                    "test_image.py"
+                    "${file}"
                 ]
             }
         ]
