@@ -5,7 +5,22 @@ from MyMatrix import Matrix
 transform = Matrix.identity(3)
 
 
-class _Point(list):
+class Figure(object):
+
+    def __init__(self, iterator):
+        self.iter = iterator
+
+    def __iter__(self):
+        return self.iter
+
+    def points(self, n):
+        return list(self.__iter__)
+
+    def transformed(self, mat):
+        return Figure((x.transformed(mat) for x in self))
+
+
+class _Point(list, Figure):
     """
     transformを気にしない普通の点
     他のFigureが点を使うときはこちらを使う
@@ -47,27 +62,27 @@ class Point(_Point):
 
     def __init__(self, pos):
         """ 座標が(scale * x, scale * y)の点を返す """
-        if len(pos) != 2:
-            return None
-        super().__init__(_Point(pos + [1.0]) * transform)
+        if len(pos) == 2:
+            pos += [1.0]
+        super().__init__(_Point(pos) * transform)
 
 
-class Line():
+class Line(Figure):
     """ 線分 """
 
     def __init__(self, a, b):
         self.a = a
         self.b = b
-        self.stopper = max(abs(self.a[0] - self.b[0]), abs(self.a[1] - self.b[1]))
+        self.max = max(abs(self.a[0] - self.b[0]), abs(self.a[1] - self.b[1]))
 
     def __repr__(self):
         return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
 
     def __iter__(self):
-        if self.stopper == 0:
+        if self.max == 0:
             return (i for i in range(0))
         else:
-            return (_Point.interpolate(self.a, self.b, i / self.stopper) for i in range(int(self.stopper) + 1))
+            return (_Point.interpolate(self.a, self.b, i / self.max) for i in range(int(self.max) + 1))
 
     def mid(self):
         return [a / 2 for a in self.a + self.b]
@@ -76,15 +91,14 @@ class Line():
         return Line(self.a.transformed(mat), self.b.transformed(mat))
 
 
-class Polygon():
+class Polygon(Figure):
     """ 多角形 """
 
     def __init__(self, points):
         self.points = points
-        self.stopper = len(points)
 
     def __iter__(self):
-        return (Line(self.points[i - 1], self.points[i]) for i in range(self.stopper))
+        return (Line(self.points[i - 1], self.points[i]) for i in range(len(self.points)))
 
     def transformed(self, mat):
         return Polygon([p.transformed(mat) for p in self.points])
@@ -93,34 +107,19 @@ class Polygon():
         return "Polygon(%s)" % str(self.points)
 
 
-class _Ellipse():
+class _Ellipse(Polygon):
     """ 楕円 """
 
-    def __init__(self, center, a, b):
+    def __init__(self, center, a, b, n=100):
         self.center = center
         self.a = a
         self.b = b
-        self.x_range = ceil((a ** 2 + b ** 2) ** -0.5 * a ** 2)
-        self.y_range = ceil((a ** 2 + b ** 2) ** -0.5 * b ** 2)
-        self.x = lambda x: b * (1 - (x / a) ** 2) ** 0.5
-        self.y = lambda y: a * (1 - (y / b) ** 2) ** 0.5
-
-    def __iter__(self):
-        return chain((_Point([self.center[0] + x,
-                              self.center[1] + self.y(x)])
-                      for x in range(-self.x_range, self.x_range)),
-                     (_Point([self.center[0] + x,
-                              self.center[1] - self.y(x)])
-                      for x in range(-self.x_range, self.x_range)),
-                     (_Point([self.center[0] + self.x(y),
-                              self.center[1] + y])
-                      for y in range(-self.y_range, self.y_range)),
-                     (_Point([self.center[0] - self.x(y),
-                              self.center[1] + y])
-                      for y in range(-self.y_range, self.y_range)))
-
-    def transformed(self, mat):
-        return _Ellipse(self.center.transformed(mat), self.a, self.b)
+        self.y = lambda x: b * (1 - (x / a) ** 2) ** 0.5
+        self.x = lambda y: a * (1 - (y / b) ** 2) ** 0.5
+        super().__init__([_Point([center[0] + a * cos(theta),
+                                  center[1] + b * sin(theta),
+                                  1.0])
+                          for theta in [i / n * pi for i in range(-n, n)]])
 
 
 class Ellipse(_Ellipse):
@@ -144,9 +143,15 @@ class Circle(_Circle):
         super().__init__(center,
                          r * transform[0][0])
 
-    def points(self, n):
-        return [_Point([self.a * cos(2 * pi * i / n) + self.center[0],
-                        self.a * sin(2 * pi * i / n) + self.center[1]]) for i in range(n)]
+    def points(self, n, stand=False):
+        if stand:
+            return [_Point([self.a * cos(2 * pi * i / n) + self.center[0],
+                            self.a * sin(2 * pi * i / n) + self.center[1],
+                            1.0]) * Matrix.affine2D(self.center, -pi + pi / 2 * 3 / n) for i in range(n)]
+        else:
+            return [_Point([self.a * cos(2 * pi * i / n) + self.center[0],
+                            self.a * sin(2 * pi * i / n) + self.center[1],
+                            1.0]) for i in range(n)]
 
 
 class Fractal():

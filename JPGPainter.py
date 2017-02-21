@@ -11,9 +11,9 @@ class JPGPainter(object):
 
     def put_pixel(self, point):
         """ canvasにpointを描画する """
-        if 0 <= point.pos[0] < self.canvas.width and 0 <= point.pos[1] < self.canvas.height:
-            self.canvas.putpixel((int(point.pos[0]), int(point.pos[1])),
-                                 (0.0, 0.0, 0.0))
+        if 0 <= point[0] < self.canvas.width and 0 <= point[1] < self.canvas.height:
+            self.canvas.putpixel((int(point[0]), int(point[1])),
+                                 (0, 0, 0))
 
     def draw_line(self, line):
         """ canvasにlineを描画する """
