@@ -150,7 +150,7 @@ def demo():
         [Flower, [circle, 256, 8]],
         [KochCurve, [line, 6, False]],
         [SierpiskiGasket, [circle.circle_points(3, True), 7, False]],
-        [Donuts, [ellipse, 50]],
+        [Donuts, [ellipse, 100]],
         [DragonCurve, [line.transformed(Matrix.affine2D(center=line.mid(), scale=[0.6, 0.6])), 15, False]]
     ]
 
