@@ -163,11 +163,11 @@ def demo():
 
         filename = os.path.join("Gallary", figure.__class__.__name__) + ".jpg"
         img.save(filename)
-        os.startfile(filename)
+        print("%s end." % figure.__class__.__name__)
 
 
 if __name__ == "__main__":
     if not os.path.exists("Gallary"):
         os.mkdir("Gallary")
     demo()
-    print("Program end.")
+    print("All end.")
