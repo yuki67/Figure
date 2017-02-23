@@ -88,7 +88,7 @@ class Flower(Circloid):
 class KochCurve(Fractal):
     """ コッホ曲線 """
 
-    def __init__(self, line, n, each=True):
+    def __init__(self, line, n, each=False):
         args = [
             [line.a, 0.0, [1 / 3, 1 / 3], Point([0.0, 0.0])],
             [line.a, -pi / 3, [1 / 3, 1 / 3], Point.interpolate(Point([0.0, 0.0]), line.b - line.a, 1 / 3)],
