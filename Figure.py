@@ -7,17 +7,31 @@ transform = Matrix.identity(3)
 
 class Figure(object):
 
-    def __init__(self, iterator):
-        self.iter = iterator
+    def get_iter(self):
+        pass
 
     def __iter__(self):
-        return self.iter
+        return self.get_iter()
 
     def points(self):
-        return list(self)
+        """ 図形のなかの部分図形が詰まったリストを返す """
+        return list(self.get_iter())
 
     def transformed(self, mat):
-        return Figure((x.transformed(mat) for x in self))
+        class temp(Figure):
+
+            def get_iter(_self):
+                return (x.transformed(mat) for x in self)
+        return temp()
+
+
+def FigureUnion(a, b):
+    """ selfとotherを一緒にしたクラス(Figureを継承したもの)を返す """
+    class Temp(Figure):
+
+        def get_iter(self):
+            return chain(a.get_iter(), b.get_iter())
+    return Temp()
 
 
 class _Point(list, Figure):
@@ -75,14 +89,15 @@ class Line(Figure):
         self.b = b
         self.max = max(abs(self.a[0] - self.b[0]), abs(self.a[1] - self.b[1]))
 
-    def __repr__(self):
-        return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
-
-    def __iter__(self):
+    def get_iter(self):
         if self.max == 0:
+            # 何もしないイテレータ
             return (i for i in range(0))
         else:
             return (_Point.interpolate(self.a, self.b, i / self.max) for i in range(int(self.max) + 1))
+
+    def __repr__(self):
+        return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
 
     def mid(self):
         return _Point([a / 2 for a in self.a + self.b])
@@ -97,7 +112,7 @@ class Polygon(Figure):
     def __init__(self, points):
         self.points = points
 
-    def __iter__(self):
+    def get_iter(self):
         return (Line(self.points[i - 1], self.points[i]) for i in range(len(self.points)))
 
     def transformed(self, mat):
@@ -114,12 +129,15 @@ class _Ellipse(Polygon):
         self.center = center
         self.a = a
         self.b = b
+        self.n = n
         self.y = lambda x: b * (1 - (x / a) ** 2) ** 0.5
         self.x = lambda y: a * (1 - (y / b) ** 2) ** 0.5
-        super().__init__([_Point([center[0] + a * cos(theta),
-                                  center[1] + b * sin(theta),
-                                  1.0])
-                          for theta in [i / n * pi for i in range(-n, n)]])
+
+    def get_iter(self):
+        return ([_Point([self.center[0] + self.a * cos(theta),
+                         self.center[1] + self.b * sin(theta),
+                         1.0])
+                 for theta in [i / self.n * pi for i in range(-self.n, self.n)]])
 
 
 class Ellipse(_Ellipse):
@@ -154,7 +172,7 @@ class Circle(_Circle):
                             1.0]) for i in range(n)]
 
 
-class Fractal():
+class Fractal(Figure):
     """ フラクタル """
 
     def __init__(self, initiator, generator, n, each=False):
@@ -163,14 +181,13 @@ class Fractal():
         self.n = n
         self.each = each
 
-    def __iter__(self):
+    def get_iter(self):
         if self.n == 0:
-            yield self.initiator
-            raise StopIteration
+            return (self.initiator for i in range(1))
         elif self.each:
-            yield self.initiator
-        for mat in self.generator:
-            yield Fractal(self.initiator.transformed(mat), self.generator, self.n - 1, self.each)
+            return chain((self.initiator for i in range(1)),
+                         (Fractal(self.initiator.transformed(mat), self.generator, self.n - 1, self.each) for mat in self.generator))
+        return (Fractal(self.initiator.transformed(mat), self.generator, self.n - 1, self.each) for mat in self.generator)
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
