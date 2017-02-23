@@ -13,7 +13,7 @@ class Figure(object):
     def __iter__(self):
         return self.get_iter()
 
-    def points(self):
+    def get_points(self):
         """ 図形のなかの部分図形が詰まったリストを返す """
         return list(self.get_iter())
 
@@ -122,10 +122,10 @@ class Polygon(Figure):
         return "Polygon(%s)" % str(self.points)
 
 
-class _Ellipse(Polygon):
+class _Ellipse(Figure):
     """ 楕円 """
 
-    def __init__(self, center, a, b, n=100):
+    def __init__(self, center, a, b, n=50):
         self.center = center
         self.a = a
         self.b = b
@@ -134,10 +134,13 @@ class _Ellipse(Polygon):
         self.x = lambda y: a * (1 - (y / b) ** 2) ** 0.5
 
     def get_iter(self):
-        return ([_Point([self.center[0] + self.a * cos(theta),
-                         self.center[1] + self.b * sin(theta),
-                         1.0])
-                 for theta in [i / self.n * pi for i in range(-self.n, self.n)]])
+        return (Line(_Point([self.center[0] + self.a * cos(theta),
+                             self.center[1] + self.b * sin(theta),
+                             1.0]),
+                     _Point([self.center[0] + self.a * cos(theta + 1 / self.n * pi),
+                             self.center[1] + self.b * sin(theta + 1 / self.n * pi),
+                             1.0]))
+                for theta in [i / self.n * pi for i in range(-self.n, self.n)])
 
 
 class Ellipse(_Ellipse):
