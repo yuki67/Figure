@@ -170,3 +170,4 @@ if __name__ == "__main__":
     if not os.path.exists("Gallary"):
         os.mkdir("Gallary")
     demo()
+    print("Program end.")
