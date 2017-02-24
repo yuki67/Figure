@@ -8,25 +8,27 @@ transform = Matrix.identity(3)
 class Figure(object):
 
     def get_iter(self):
+        """ イテレータを"新しく作って"返す """
         pass
 
     def __iter__(self):
         return self.get_iter()
 
     def get_points(self):
-        """ 図形のなかの部分図形が詰まったリストを返す """
+        """ selfのなかの部分図形が詰まったリストを返す """
         return list(self.get_iter())
 
     def transformed(self, mat):
-        class temp(Figure):
+        """ selfを行列matで変形してものを返す """
+        class Temp(Figure):
 
             def get_iter(_self):
                 return (x.transformed(mat) for x in self)
-        return temp()
+        return Temp()
 
 
 def FigureUnion(a, b):
-    """ selfとotherを一緒にしたクラス(Figureを継承したもの)を返す """
+    """ aとbを一緒にした図形を返す """
     class Temp(Figure):
 
         def get_iter(self):
@@ -35,10 +37,7 @@ def FigureUnion(a, b):
 
 
 class _Point(list, Figure):
-    """
-    transformを気にしない普通の点
-    他のFigureが点を使うときはこちらを使う
-    """
+    """ 点 """
 
     def __repr__(self):
         return "_Point(%s)" % str(list(self))
@@ -61,6 +60,7 @@ class _Point(list, Figure):
         return _Point([sum([self[j] * other[j][i] for j in range(len(other[i]))]) for i in range(len(other))])
 
     def scale(self, r):
+        """ 座標をr倍した点を返す """
         return _Point([r * x for x in self])
 
     def transformed(self, mat):
@@ -68,14 +68,9 @@ class _Point(list, Figure):
 
 
 class Point(_Point):
-    """
-    Figure.scaleを気にする点
-    ユーザーがプログラムで使うのはこっち
-    ユーザーがFigure.scaleを適宜変更することで、扱いやすい座標系([0.0, 1.0]^2など)で図形を描くことが可能になる
-    """
+    """ Figure.transformを考慮する点 """
 
     def __init__(self, pos):
-        """ 座標が(scale * x, scale * y)の点を返す """
         if len(pos) == 2:
             pos += [1.0]
         super().__init__(_Point(pos) * transform)
@@ -100,6 +95,7 @@ class Line(Figure):
         return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
 
     def mid(self):
+        """ 線分の中点を返す """
         return _Point([a / 2 for a in self.a + self.b])
 
     def transformed(self, mat):
@@ -144,6 +140,7 @@ class _Ellipse(Figure):
 
 
 class Ellipse(_Ellipse):
+    """ self.transformを考慮する楕円 """
 
     def __init__(self, center, a, b):
         super().__init__(center,
@@ -159,12 +156,17 @@ class _Circle(_Ellipse):
 
 
 class Circle(_Circle):
+    """ self.transformを考慮する円 """
 
     def __init__(self, center, r):
         super().__init__(center,
                          r * transform[0][0])
 
     def circle_points(self, n, stand=False):
+        """
+        演習をn分割するの点を返す
+        Figure.stand=Trueの場合、n角形が立つように回転させてから返す
+        """
         if stand:
             return [_Point([self.a * cos(2 * pi * i / n) + self.center[0],
                             self.a * sin(2 * pi * i / n) + self.center[1],
