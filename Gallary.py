@@ -3,7 +3,7 @@ import os
 from math import pi
 from PIL import Image
 import Figure
-from Figure import Line, Point, _Point, Fractal, Polygon, Circle, Ellipse
+from Figure import Line, Point, Fractal, Polygon, Circle, Ellipse
 from JPGPainter import JPGPainter
 from MyMatrix import Matrix
 
@@ -135,11 +135,13 @@ class Donuts(Fractal):
 
 def demo():
     width, height = 1024, 1024
-    Figure.transform = Matrix.scale2D(width, height)
+    rad = min(width, height) / 2
+    gl_mat = Matrix.scale2D(width, height)
 
-    circle = Circle(Point([0.5, 0.5]), 0.5)
-    ellipse = Ellipse(Point([0.5, 0.5]), 0.5, 0.2)
-    line = Line(Point([0.05, 0.5]), Point([0.95, 0.5]))
+    center = Point([0.5, 0.5]).transformed(gl_mat)
+    circle = Circle(center, rad)
+    ellipse = Ellipse(center, rad, rad / 2)
+    line = Line(Point([0.05, 0.5]).transformed(gl_mat), Point([0.95, 0.5]).transformed(gl_mat))
     exhibits = [
         [Diamond, [circle, 32]],
         [Cardioid, [circle, 256]],

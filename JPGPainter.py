@@ -1,5 +1,5 @@
 from PIL import ImageDraw
-from Figure import _Point, Line
+from Figure import Point, Line
 
 
 class JPGPainter(object):
@@ -26,7 +26,7 @@ class JPGPainter(object):
 
     def draw(self, figure):
         """ canvasにfigureを描く """
-        if isinstance(figure, _Point):
+        if isinstance(figure, Point):
             self.put_pixel(figure)
         elif isinstance(figure, Line):
             self.draw_line(figure)

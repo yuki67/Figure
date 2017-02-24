@@ -36,14 +36,14 @@ def FigureUnion(a, b):
     return Temp()
 
 
-class _Point(list, Figure):
+class Point(list, Figure):
     """ 点 """
 
     def __init__(self, lst):
         super().__init__(lst[:2])
 
     def __repr__(self):
-        return "_Point(%s)" % str(list(self))
+        return "Point(%s)" % str(list(self))
 
     def interpolate(self, b, r):
         """
@@ -51,31 +51,24 @@ class _Point(list, Figure):
         r = 0 で self
         r = 1 で b
         """
-        return _Point((b - self).scale(r) + self)
+        return Point((b - self).scale(r) + self)
 
     def __add__(self, other):
-        return _Point([a + b for a, b in zip(self, other)])
+        return Point([a + b for a, b in zip(self, other)])
 
     def __sub__(self, other):
-        return _Point([a - b for a, b in zip(self, other)])
+        return Point([a - b for a, b in zip(self, other)])
 
     def __mul__(self, other):
         temp = list.__add__(self, [1.0])
-        return _Point([sum([temp[j] * other[j][i] for j in range(len(other[i]))]) for i in range(len(other))])
+        return Point([sum([temp[j] * other[j][i] for j in range(len(other[i]))]) for i in range(len(other))])
 
     def scale(self, r):
         """ 座標をr倍した点を返す """
-        return _Point([r * x for x in self])
+        return Point([r * x for x in self])
 
     def transformed(self, mat):
-        return _Point(self * mat)
-
-
-class Point(_Point):
-    """ Figure.transformを考慮する点 """
-
-    def __init__(self, pos):
-        super().__init__(_Point(pos) * transform)
+        return Point(self * mat)
 
 
 class Line(Figure):
@@ -91,14 +84,14 @@ class Line(Figure):
             # 何もしないイテレータ
             return (i for i in range(0))
         else:
-            return (_Point.interpolate(self.a, self.b, i / self.max) for i in range(int(self.max) + 1))
+            return (Point.interpolate(self.a, self.b, i / self.max) for i in range(int(self.max) + 1))
 
     def __repr__(self):
         return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
 
     def mid(self):
         """ 線分の中点を返す """
-        return _Point([a / 2 for a in self.a + self.b])
+        return Point([a / 2 for a in self.a + self.b])
 
     def transformed(self, mat):
         return Line(self.a.transformed(mat), self.b.transformed(mat))
@@ -120,7 +113,7 @@ class Polygon(Figure):
         return "Polygon(%s)" % str(self.points)
 
 
-class _Ellipse(Figure):
+class Ellipse(Figure):
     """ 楕円 """
 
     def __init__(self, center, a, b, n=50):
@@ -132,37 +125,28 @@ class _Ellipse(Figure):
         self.x = lambda y: a * (1 - (y / b) ** 2) ** 0.5
 
     def get_iter(self):
-        return (Line(_Point([self.center[0] + self.a * cos(theta),
-                             self.center[1] + self.b * sin(theta),
-                             1.0]),
-                     _Point([self.center[0] + self.a * cos(theta + 1 / self.n * pi),
-                             self.center[1] + self.b * sin(theta + 1 / self.n * pi),
-                             1.0]))
+        return (Line(Point([self.center[0] + self.a * cos(theta),
+                            self.center[1] + self.b * sin(theta),
+                            1.0]),
+                     Point([self.center[0] + self.a * cos(theta + 1 / self.n * pi),
+                            self.center[1] + self.b * sin(theta + 1 / self.n * pi),
+                            1.0]))
                 for theta in [i / self.n * pi for i in range(-self.n, self.n)])
 
-
-class Ellipse(_Ellipse):
-    """ self.transformを考慮する楕円 """
-
-    def __init__(self, center, a, b):
-        super().__init__(center,
-                         a * transform[0][0],
-                         b * transform[0][0])
+    def transformed(self, mat):
+        temp = super().transformed(mat)
+        temp.center = self.center
+        return temp
 
 
-class _Circle(_Ellipse):
+class Circle(Ellipse):
     """ 円 """
 
     def __init__(self, center, r):
         super().__init__(center, r, r)
 
-
-class Circle(_Circle):
-    """ self.transformを考慮する円 """
-
-    def __init__(self, center, r):
-        super().__init__(center,
-                         r * transform[0][0])
+    def transformed(self, mat):
+        return Circle(self.center * mat, self.a * mat[0][0])
 
     def circle_points(self, n, stand=False):
         """
@@ -170,13 +154,13 @@ class Circle(_Circle):
         Figure.stand=Trueの場合、n角形が立つように回転させてから返す
         """
         if stand:
-            return [_Point([self.a * cos(2 * pi * i / n) + self.center[0],
-                            self.a * sin(2 * pi * i / n) + self.center[1],
-                            1.0]) * Matrix.affine2D(self.center, -pi + pi / 2 * 3 / n) for i in range(n)]
+            return [Point([self.a * cos(2 * pi * i / n) + self.center[0],
+                           self.a * sin(2 * pi * i / n) + self.center[1],
+                           1.0]) * Matrix.affine2D(self.center, -pi + pi / 2 * 3 / n) for i in range(n)]
         else:
-            return [_Point([self.a * cos(2 * pi * i / n) + self.center[0],
-                            self.a * sin(2 * pi * i / n) + self.center[1],
-                            1.0]) for i in range(n)]
+            return [Point([self.a * cos(2 * pi * i / n) + self.center[0],
+                           self.a * sin(2 * pi * i / n) + self.center[1],
+                           1.0]) for i in range(n)]
 
 
 class Fractal(Figure):
