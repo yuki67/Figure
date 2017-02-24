@@ -151,7 +151,7 @@ class Circle(Ellipse):
     def circle_points(self, n, stand=False):
         """
         演習をn分割するの点を返す
-        Figure.stand=Trueの場合、n角形が立つように回転させてから返す
+        stand=Trueの場合、n角形が立つように回転させてから返す
         """
         if stand:
             return [Point([self.a * cos(2 * pi * i / n) + self.center[0],
