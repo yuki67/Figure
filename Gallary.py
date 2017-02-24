@@ -159,6 +159,7 @@ def demo():
         painter = JPGPainter(img)
 
         figure = exhibit(*args)
+        print("%s begin." % figure.__class__.__name__)
         painter.draw(figure)
 
         filename = os.path.join("Gallary", figure.__class__.__name__) + ".jpg"
