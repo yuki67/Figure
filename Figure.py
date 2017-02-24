@@ -39,6 +39,9 @@ def FigureUnion(a, b):
 class _Point(list, Figure):
     """ 点 """
 
+    def __init__(self, lst):
+        super().__init__(lst[:2])
+
     def __repr__(self):
         return "_Point(%s)" % str(list(self))
 
@@ -57,7 +60,8 @@ class _Point(list, Figure):
         return _Point([a - b for a, b in zip(self, other)])
 
     def __mul__(self, other):
-        return _Point([sum([self[j] * other[j][i] for j in range(len(other[i]))]) for i in range(len(other))])
+        temp = list.__add__(self, [1.0])
+        return _Point([sum([temp[j] * other[j][i] for j in range(len(other[i]))]) for i in range(len(other))])
 
     def scale(self, r):
         """ 座標をr倍した点を返す """
@@ -71,8 +75,6 @@ class Point(_Point):
     """ Figure.transformを考慮する点 """
 
     def __init__(self, pos):
-        if len(pos) == 2:
-            pos += [1.0]
         super().__init__(_Point(pos) * transform)
 
 
