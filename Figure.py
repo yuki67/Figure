@@ -135,7 +135,7 @@ class Ellipse(Figure):
 
     def transformed(self, mat):
         temp = super().transformed(mat)
-        temp.center = self.center
+        temp.center = self.center.transformed(mat)
         return temp
 
 
