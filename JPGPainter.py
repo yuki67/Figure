@@ -1,4 +1,4 @@
-from PIL import ImageDraw
+from PIL import ImageDraw, Image
 from Figure import Point, Line
 
 
@@ -32,3 +32,22 @@ class JPGPainter(object):
             self.draw_line(figure)
         else:
             self.split_and_draw(figure)
+
+
+def save_gif(figure, filename, width, height, duration=100, loop=True):
+    """ figureを書くGIF画像を作る """
+    # 注意: 一つの図形を書くたびにフレームが追加されるため場合によってはとても重くなる
+    img = Image.new("RGB", (width + 1, height + 1), "white")
+    gif_images = []
+
+    class AnxiousPainter(JPGPainter):
+        """ drawするたびにgif_imagesに画像のコピーを追加するようにしたJPGPainter """
+
+        def draw(self, figure):
+            """ canvasにfigureを描く """
+            super().draw(figure)
+            gif_images.append(self.canvas.copy())
+
+    AnxiousPainter(img).draw(figure)
+    # サイズを小さくしたいのは山々だが、optimizeをFalse以外にすると画像が壊れる(Pillowのバグ)
+    Image.new("RGB", (width + 1, height + 1), "white").save(filename, save_all=True, append_images=gif_images, loop=loop, duration=duration, optimize=False)
