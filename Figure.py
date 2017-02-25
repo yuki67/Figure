@@ -166,19 +166,22 @@ class Circle(Ellipse):
 class Fractal(Figure):
     """ フラクタル """
 
-    def __init__(self, initiator, generator, n, each=False):
+    def __init__(self, initiator, generator, n, each=False, init_generator=False):
         self.initiator = initiator
         self.generator = generator
         self.n = n
         self.each = each
+        self.init_generator = init_generator if init_generator else generator
 
     def get_iter(self):
         if self.n == 0:
-            return (self.initiator for i in range(1))
-        elif self.each:
-            return chain((self.initiator for i in range(1)),
-                         (Fractal(self.initiator.transformed(mat), self.generator, self.n - 1, self.each) for mat in self.generator))
-        return (Fractal(self.initiator.transformed(mat), self.generator, self.n - 1, self.each) for mat in self.generator)
+            return (self.initiator for i in range(0))
+        if self.n == 1:
+            return (self.initiator.transformed(gen) for gen in self.generator)
+        if self.each:
+            return chain((self.initiator.transformed(gen) for gen in self.generator),
+                         (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator))
+        return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
 
     def __repr__(self):
-        return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
+        return "Fractal(%s, %d)" % (str(self.initiator), self.n)
