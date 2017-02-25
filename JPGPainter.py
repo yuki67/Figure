@@ -1,5 +1,5 @@
 from PIL import ImageDraw, Image
-from Figure import Point, Line
+from Figure import Point, Line, Fractal
 
 
 class JPGPainter(object):
@@ -49,5 +49,27 @@ def save_gif(figure, filename, width, height, duration=100, loop=True):
             gif_images.append(self.canvas.copy())
 
     AnxiousPainter(img).draw(figure)
+    # サイズを小さくしたいのは山々だが、optimizeをFalse以外にすると画像が壊れる(Pillowのバグ)
+    Image.new("RGB", (width + 1, height + 1), "white").save(filename, save_all=True, append_images=gif_images, loop=loop, duration=duration, optimize=False)
+
+
+def save_fractal_gif(fractal, filename, width, height, duration=100, loop=True):
+    """ フラクタルを書くGIF画像を作る """
+    img = Image.new("RGB", (width + 1, height + 1), "white")
+    initiator_class = fractal.initiator.__class__
+    gif_images = []
+
+    class AnxiousPainter(JPGPainter):
+        """ fractal.initiatorを書くたびにgif_imagesに画像のコピーを追加するJPGPainter """
+        n = 0
+
+        def draw(self, figure):
+            """ canvasにfigureを描く """
+            super().draw(figure)
+            if isinstance(figure, initiator_class):
+                print(figure)
+                gif_images.append(self.canvas.copy())
+
+    AnxiousPainter(img).draw(fractal)
     # サイズを小さくしたいのは山々だが、optimizeをFalse以外にすると画像が壊れる(Pillowのバグ)
     Image.new("RGB", (width + 1, height + 1), "white").save(filename, save_all=True, append_images=gif_images, loop=loop, duration=duration, optimize=False)
