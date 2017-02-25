@@ -7,6 +7,9 @@ transform = Matrix.identity(3)
 
 class Figure(object):
 
+    def __init__(self, made_from=()):
+        self.made_from = made_from
+
     def get_iter(self):
         """ イテレータを"新しく作って"返す """
         pass
@@ -24,7 +27,7 @@ class Figure(object):
 
             def get_iter(_self):
                 return (x.transformed(mat) for x in self)
-        return Temp()
+        return Temp((self.__class__,))
 
 
 def FigureUnion(a, b):
@@ -33,7 +36,7 @@ def FigureUnion(a, b):
 
         def get_iter(self):
             return chain(a.get_iter(), b.get_iter())
-    return Temp()
+    return Temp((a.__class, b.__class__))
 
 
 class Point(list, Figure):
@@ -41,6 +44,7 @@ class Point(list, Figure):
 
     def __init__(self, lst):
         super().__init__(lst[:2])
+        Figure.__init__(self)
 
     def __repr__(self):
         return "Point(%s)" % str(list(self))
@@ -78,6 +82,7 @@ class Line(Figure):
         self.a = a
         self.b = b
         self.max = max(abs(self.a[0] - self.b[0]), abs(self.a[1] - self.b[1]))
+        super().__init__()
 
     def get_iter(self):
         if self.max == 0:
@@ -102,6 +107,7 @@ class Polygon(Figure):
 
     def __init__(self, points):
         self.points = points
+        super().__init__()
 
     def get_iter(self):
         return (Line(self.points[i - 1], self.points[i]) for i in range(len(self.points)))
@@ -123,6 +129,7 @@ class Ellipse(Figure):
         self.n = n
         self.y = lambda x: b * (1 - (x / a) ** 2) ** 0.5
         self.x = lambda y: a * (1 - (y / b) ** 2) ** 0.5
+        super().__init__()
 
     def get_iter(self):
         return (Line(Point([self.center[0] + self.a * cos(theta),
@@ -172,6 +179,7 @@ class Fractal(Figure):
         self.n = n
         self.each = each
         self.init_generator = init_generator if init_generator else generator
+        super().__init__()
 
     def get_iter(self):
         if self.n == 0:
