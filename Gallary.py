@@ -134,6 +134,20 @@ class Donuts(Fractal):
         super().__init__(ellipse, generator, n, each=True)
 
 
+class OneLineSweeping(Fractal):
+    """ 直線からの掃討 """
+
+    def __init__(self, line, n, each=True):
+        p = (line.b - line.a).scale(0.5)
+        args = [
+            [line.a, -pi / 4, [2**-0.5, 2**-0.5], Point([0.0, 0.0]), [False, True]],
+            [line.a, 0, [0.5, 0.5], Point([p[1], -p[0]]) + p, [False, False]],
+            [line.b, pi / 2, [0.5, 0.5], Point([p[1], -p[0]]), [True, True]],
+        ]
+        generator = [Matrix.affine2D(c, r, s, t, m) for c, r, s, t, m in args]
+        super().__init__(line, generator, n, each)
+
+
 def demo():
     width, height = 1024, 1024
     rad = min(width, height) / 2
@@ -142,7 +156,8 @@ def demo():
     center = Point([0.5, 0.5]).transformed(gl_mat)
     circle = Circle(center, rad)
     ellipse = Ellipse(center, rad, rad / 2)
-    line = Line(Point([0.05, 0.5]).transformed(gl_mat), Point([0.95, 0.5]).transformed(gl_mat))
+    line = Line(Point([0.05, 0.5]), Point([0.95, 0.5])).transformed(gl_mat)
+    bottom_line = Line(Point([0.05, 0.95]), Point([0.95, 0.95])).transformed(gl_mat)
     exhibits = [
         [Diamond, [circle, 32]],
         [Cardioid, [circle, 256]],
@@ -154,7 +169,8 @@ def demo():
         [KochCurve, [line, 6, False]],
         [SierpinskiGasket, [circle.circle_points(3, True), 7, False]],
         [Donuts, [ellipse, 100]],
-        [DragonCurve, [line.transformed(Matrix.affine2D(center=line.mid(), scale=[0.6, 0.6])), 15, False]]
+        [DragonCurve, [line.transformed(Matrix.affine2D(center=line.mid(), scale=[0.6, 0.6])), 15, False]],
+        [OneLineSweeping, [bottom_line, 8, False]],
     ]
 
     for exhibit, args in exhibits:
