@@ -113,7 +113,7 @@ class DragonCurve(Fractal):
         super().__init__(line, generator, n, each)
 
 
-class SierpiskiGasket(Fractal):
+class SierpinskiGasket(Fractal):
     """ シェルピンスキーのギャスケット """
 
     def __init__(self, points, n):
@@ -152,7 +152,7 @@ def demo():
         [JumpRope, [circle, 256]],
         [Flower, [circle, 256, 8]],
         [KochCurve, [line, 6, False]],
-        [SierpiskiGasket, [circle.circle_points(3, True), 7, False]],
+        [SierpinskiGasket, [circle.circle_points(3, True), 7, False]],
         [Donuts, [ellipse, 100]],
         [DragonCurve, [line.transformed(Matrix.affine2D(center=line.mid(), scale=[0.6, 0.6])), 15, False]]
     ]
