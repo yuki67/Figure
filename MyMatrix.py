@@ -47,8 +47,15 @@ class Matrix(list):
                        [0.0, 0.0, 1.0]])
 
     @staticmethod
-    def affine2D(center=[0.0, 0.0], rot=0.0, scale=[1.0, 1.0], trans=[0.0, 0.0]):
+    def swap2D(x, y):
+        return Matrix([[2 * int(not x) - 1, 0.0, 0.0],
+                       [0.0, 2 * int(not y) - 1, 0.0],
+                       [0.0, 0.0, 1.0]])
+
+    @staticmethod
+    def affine2D(center=[0.0, 0.0], rot=0.0, scale=[1.0, 1.0], trans=[0.0, 0.0], swap=[False, False]):
         return Matrix.trans2D(-center[0], -center[1]) * \
+            Matrix.swap2D(*swap) * \
             Matrix.rot2D(rot) * \
             Matrix.scale2D(scale[0], scale[1]) * \
             Matrix.trans2D(trans[0], trans[1]) * \
