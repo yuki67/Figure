@@ -89,11 +89,12 @@ class KochCurve(Fractal):
     """ コッホ曲線 """
 
     def __init__(self, line, n, each=False):
+        r = 1 / 3
         args = [
-            [line.a, 0.0, [1 / 3, 1 / 3], Point([0.0, 0.0])],
-            [line.a, -pi / 3, [1 / 3, 1 / 3], Point.interpolate(Point([0.0, 0.0]), line.b - line.a, 1 / 3)],
-            [line.b, pi / 3, [1 / 3, 1 / 3], Point.interpolate(Point([0.0, 0.0]), line.a - line.b, 1 / 3)],
-            [line.b, 0.0, [1 / 3, 1 / 3], Point([0.0, 0.0])],
+            [line.a, 0.0, [r, r], Point([0.0, 0.0])],
+            [line.a, -pi / 3, [r, r], (line.b - line.a).scale(r)],
+            [line.b, pi / 3, [r, r], (line.a - line.b).scale(r)],
+            [line.b, 0.0, [r, r], Point([0.0, 0.0])],
         ]
         generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
         super().__init__(line, generator, n, each)
@@ -115,13 +116,13 @@ class DragonCurve(Fractal):
 class SierpiskiGasket(Fractal):
     """ シェルピンスキーのギャスケット """
 
-    def __init__(self, points, n, each):
+    def __init__(self, points, n):
         center = sum(points, Point([0.0, 0.0])).scale(1 / len(points))
         args = [
-            [center, 0.0, [0.5, 0.5], Point.interpolate(Point([0.0, 0.0]), p - center, 0.5)] for p in points
+            [center, 0.0, [0.5, 0.5], (p - center).scale(0.5)] for p in points
         ]
         generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
-        super().__init__(Polygon(points), generator, n, each)
+        super().__init__(Polygon(points), generator, n)
 
 
 class Donuts(Fractal):
