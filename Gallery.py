@@ -181,13 +181,13 @@ def demo():
         print("%s begin." % figure.__class__.__name__)
         painter.draw(figure)
 
-        filename = os.path.join("Gallary", figure.__class__.__name__) + ".jpg"
+        filename = os.path.join("Gallery", figure.__class__.__name__) + ".jpg"
         img.save(filename)
         print("%s end." % figure.__class__.__name__)
 
 
 if __name__ == "__main__":
-    if not os.path.exists("Gallary"):
-        os.mkdir("Gallary")
+    if not os.path.exists("Gallery"):
+        os.mkdir("Gallery")
     demo()
     print("All end.")
