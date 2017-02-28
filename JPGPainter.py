@@ -53,7 +53,7 @@ def save_gif(figure, filename, width, height, duration=100, loop=True):
     Image.new("RGB", (width + 1, height + 1), "white").save(filename, save_all=True, append_images=gif_images, loop=loop, duration=duration, optimize=False)
 
 
-def save_fractal_gif(fractal, filename, width, height, duration=100, loop=True):
+def save_fractal_gif(fractal, filename, width, height, duration=100, loop=0xffff):
     """ フラクタルを書くGIF画像を作る """
     img = Image.new("RGB", (width + 1, height + 1), "white")
     initiator_class = fractal.initiator.__class__
@@ -69,7 +69,7 @@ def save_fractal_gif(fractal, filename, width, height, duration=100, loop=True):
             # イニシエータを書いたらgif_imagesに保存する
             # イニシエータを書いたとき必ずしもinitiator.__class__ == figure.__class__でないので、
             # figure.made_dromを使って判定を行う点に注意
-            if initiator_class in figure.made_from:
+            if initiator_class in figure.made_from or initiator_class == figure.__class__:
                 gif_images.append(self.canvas.copy())
 
     AnxiousPainter(img).draw(fractal)
