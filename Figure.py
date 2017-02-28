@@ -96,7 +96,7 @@ class Point(list, Figure):
         """
         行列との積
         >>> Point([1.0, 2.0]) * Matrix.affine2D(swap=[True, True], trans=[2.0, 3.0])
-        Point([-3.0, -5.0])
+        Point([1.0, 1.0])
         """
         temp = list.__add__(self, [1.0])
         return Point([sum([temp[j] * other[j][i] for j in range(len(other[i]))]) for i in range(len(other))])
@@ -285,9 +285,13 @@ class Fractal(Figure):
         [Line(Point([0.0, 0.0]), Point([10.0, 10.0])), Line(Point([0.0, 1.0]), Point([10.0, 11.0]))]
         """
         if self.n == 0:
-            return (self.initiator for i in range(0))
+            return (self.initiator for i in range(1))
         if self.n == 1:
-            return (self.initiator.transformed(gen) for gen in self.generator)
+            if self.each:
+                return chain((self.initiator for i in range(1)),
+                             (self.initiator.transformed(gen) for gen in self.generator))
+            else:
+                return (self.initiator.transformed(gen) for gen in self.generator)
         if self.each:
             return chain((self.initiator.transformed(gen) for gen in self.generator),
                          (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator))
