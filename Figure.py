@@ -120,7 +120,7 @@ class Line(Figure):
     def __init__(self, a, b):
         self.a = a
         self.b = b
-        self.max = max(abs(self.a[0] - self.b[0]), abs(self.a[1] - self.b[1]))
+        self.max = max([abs(i - j) for i, j in zip(self.a, self.b)])
         super().__init__((Line,))
 
     def get_iter(self):
