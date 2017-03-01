@@ -39,15 +39,16 @@ def figure_union(figures):
     """
     figuresに含まれる図形をひとまとめにした図形を返す
 
-    >>> a = Line(Point([0,0, 0.0]), Point([10, 10]))
-    >>> b = Line(Point([10,0, 0.0]), Point([0, 10]))
+    >>> a = Line(Point([0.0, 0.0]), Point([10.0, 10.0]))
+    >>> b = Line(Point([10.0, 0.0]), Point([0.0, 10.0]))
     >>> c = Circle(Point([0.5, 0.5]), 4)
     >>> for f in figure_union((a, b, c)):
     ...     print(f)
-    Line(Point([0, 0]), Point([10, 10]))
-    Line(Point([10, 0]), Point([0, 10]))
+    Line(Point([0.0, 0.0]), Point([10.0, 10.0]))
+    Line(Point([10.0, 0.0]), Point([0.0, 10.0]))
     Circle(Point([0.5, 0.5]), 4)
     """
+
     class Temp(Figure):
 
         def get_iter(self):
@@ -57,8 +58,8 @@ def figure_union(figures):
 
 class Point(list, Figure):
     """
-    二次元平面上の点
-    行列との乗算をサポートするが、保持する値は2つだけ
+    n次元平面上の点
+    行列との乗算をサポートするが、保持する値はn個だけ
 
     >>> a = Point([1.0, 2.0])
     >>> a[0]
@@ -72,7 +73,7 @@ class Point(list, Figure):
     """
 
     def __init__(self, lst):
-        super().__init__(lst[:2])
+        super().__init__(lst)
         Figure.__init__(self, (Point,))
 
     def __repr__(self):
@@ -92,14 +93,14 @@ class Point(list, Figure):
         """
         return Point([a - b for a, b in zip(self, other)])
 
-    def __mul__(self, other):
+    def __mul__(self, mat):
         """
         行列との積
         >>> Point([1.0, 2.0]) * Matrix.affine2D(swap=[True, True], trans=[2.0, 3.0])
         Point([1.0, 1.0])
         """
         temp = list.__add__(self, [1.0])
-        return Point([sum([temp[j] * other[j][i] for j in range(len(other[i]))]) for i in range(len(other))])
+        return Point([mat[i][-1] + sum([temp[j] * mat[j][i] for j in range(len(mat[i]))]) for i in range(len(mat) - 1)])
 
     def scaled(self, r):
         """
@@ -259,12 +260,12 @@ class Circle(Ellipse):
         """
         if stand:
             return [Point([self.a * cos(2 * pi * i / n) + self.center[0],
-                           self.a * sin(2 * pi * i / n) + self.center[1],
-                           1.0]) * Matrix.affine2D(self.center, rot=-pi + pi / 2 * 3 / n) for i in range(n)]
+                           self.a * sin(2 * pi * i / n) + self.center[1]
+                           ]) * Matrix.affine2D(self.center, rot=-pi + pi / 2 * 3 / n) for i in range(n)]
         else:
             return [Point([self.a * cos(2 * pi * i / n) + self.center[0],
-                           self.a * sin(2 * pi * i / n) + self.center[1],
-                           1.0]) for i in range(n)]
+                           self.a * sin(2 * pi * i / n) + self.center[1]
+                           ]) for i in range(n)]
 
 
 class Fractal(Figure):
