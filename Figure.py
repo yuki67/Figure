@@ -135,7 +135,7 @@ class Line(Figure):
         """
         if self.max == 0:
             # 何もしないイテレータ
-            return (i for i in range(0))
+            return iter(())
         else:
             return (self.a + (self.b - self.a).scaled(i / self.max) for i in range(int(self.max) + 1))
 
