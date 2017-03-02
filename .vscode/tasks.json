@@ -2,7 +2,9 @@
     "version": "0.1.0",
     "windows": {
         "command": "cmd",
-        "args": [ "/c" ],
+        "args": [
+            "/c"
+        ],
         "isShellCommand": true,
         "echoCommand": true,
         "suppressTaskName": true,
@@ -12,9 +14,19 @@
                 "taskName": "run python in new window",
                 "isTestCommand": true,
                 "args": [
-                    "start", 
-                    "cmd /c", 
+                    "start",
+                    "cmd /c",
                     "python",
+                    "${file}"
+                ]
+            },
+            {
+                "taskName": "run doctest",
+                "isTestCommand": true,
+                "args": [
+                    "python",
+                    "-m",
+                    "doctest",
                     "${file}"
                 ]
             },
