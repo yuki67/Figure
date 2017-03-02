@@ -25,18 +25,25 @@ class Figure(object):
         pass
 
     def projected(self, proj_mat):
-        """ ひとつ下の次元に平行投影された図形を返す """
+        """ ひとつ下の次元に透視変換された図形を返す """
         pass
 
 
-def figure_union(figures):
-    """ figuresに含まれる図形をひとまとめにした図形を返す """
+class UnionFigure(Figure):
+    """ 複数の図形をひとまとめにした図形 """
 
-    class Temp(Figure):
+    def __init__(self, figures):
+        self.figures = figures
+        super().__init__()
 
-        def get_iter(self):
-            return (f for f in figures)
-    return Temp()
+    def get_iter(self):
+        return (f for f in self.figures)
+
+    def transformed(self, mat):
+        return (f.transformed(mat) for f in self.figures)
+
+    def projected(self, proj_mat):
+        return (f.proj_mat() for f in self.figures)
 
 
 class Point(list, Figure):
@@ -156,9 +163,6 @@ class Ellipse(Polygon):
     def __repr__(self):
         return "Ellipse(%s, %s, %s)" % (self.center, self.a, self.b)
 
-    def transformed(self, mat):
-        return Ellipse([p.transformed(mat) for p in self.points], n=self.n)
-
 
 class Circle(Ellipse):
     """ 円 """
@@ -213,7 +217,14 @@ class Fractal(Figure):
         return Fractal(self.initiator.transformed(mat), self.generator, self.n, self.each)
 
     def projected(self, proj_mat):
-        return Fractal(self.initiator.projected(proj_mat), self.generator, self.n, self.each)
+        if self.each:
+            return UnionFigure((Fractal(self.initiator, self.init_generator, n, False, self.init_generator).projected(proj_mat) for n in range(self.n + 1)))
+        if self.n == 0:
+            return self.initiator.projected(proj_mat)
+        if self.n == 1:
+            return UnionFigure((self.initiator.transformed(gen).projected(proj_mat) for gen in self.generator))
+        else:
+            return UnionFigure((Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator).projected(proj_mat) for mat in self.generator))
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)

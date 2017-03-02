@@ -8,7 +8,7 @@ if __name__ == "__name__":
 >>> a = Line(Point([0.0, 0.0]), Point([10.0, 10.0]))
 >>> b = Line(Point([10.0, 0.0]), Point([0.0, 10.0]))
 >>> c = Circle(Point([0.5, 0.5]), 4)
->>> for f in figure_union((a, b, c)):
+>>> for f in UnionFigure((a, b, c)):
 ...     print(f)
 Line(Point([0.0, 0.0]), Point([10.0, 10.0]))
 Line(Point([10.0, 0.0]), Point([0.0, 10.0]))
