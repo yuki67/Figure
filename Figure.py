@@ -24,7 +24,7 @@ class Figure(object):
         """ selfを行列matで変形してものを返す """
         pass
 
-    def projected(self):
+    def projected(self, proj_mat):
         """ ひとつ下の次元に平行投影された図形を返す """
         pass
 
@@ -64,8 +64,10 @@ class Point(list, Figure):
     def transformed(self, mat):
         return Point(self * mat)
 
-    def projected(self):
-        return Point(self[:-1])
+    def projected(self, proj_mat):
+        temp = list.__add__(self, [1.0])
+        temp = Point([sum([temp[j] * proj_mat[j][i] for j in range(len(proj_mat[i]))]) for i in range(len(proj_mat))])
+        return Point([x / temp[-1] for x in temp[:-2]])
 
     def scaled(self, r):
         """
@@ -98,8 +100,8 @@ class Line(Figure):
     def transformed(self, mat):
         return Line(self.a.transformed(mat), self.b.transformed(mat))
 
-    def projected(self):
-        return Line(self.a.projected(), self.b.projected())
+    def projected(self, proj_mat):
+        return Line(self.a.projected(proj_mat), self.b.projected(proj_mat))
 
     def mid(self):
         """ 線分の中点を返す
@@ -126,8 +128,8 @@ class Polygon(Figure):
     def transformed(self, mat):
         return Polygon([p.transformed(mat) for p in self.points])
 
-    def projected(self):
-        return Polygon([p.transformed() for p in self.points])
+    def projected(self, proj_mat):
+        return Polygon([p.projected(proj_mat) for p in self.points])
 
     def get_points(self):
         """ Polygonの制御点を返す """
@@ -210,8 +212,8 @@ class Fractal(Figure):
     def transformed(self, mat):
         return Fractal(self.initiator.transformed(mat), self.generator, self.n, self.each)
 
-    def projected(self):
-        return Fractal(self.initiator.projected(), self.generator, self.n, self.each)
+    def projected(self, proj_mat):
+        return Fractal(self.initiator.projected(proj_mat), self.generator, self.n, self.each)
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)

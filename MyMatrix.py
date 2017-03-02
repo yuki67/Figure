@@ -98,6 +98,13 @@ class Matrix(list):
                        [0.0, 0.0, 0.0, 1.0]])
 
     @staticmethod
+    def projection3D(n, f, l, b, r, t):
+        return Matrix([[2 * n / (r - l), 0, 0, 0],
+                       [0, 2 * n / (t - b), 0, 0],
+                       [-(r + l) / (r - l), -(t + b) / (t - b), f / (f - n), 1],
+                       [0, 0, -f * n / (f - n), 0]])
+
+    @staticmethod
     def affine3D(center=(0.0, 0.0, 0.0), rot=(0.0, 0.0, 0.0), scale=(1.0, 1.0, 1.0), trans=(0.0, 0.0, 0.0), swap=(False, False, False)):
         # swapは変換の最初に行われるが、指定される頻度が低いと思われるので引数の最後においてある点に注意
         return Matrix.trans3D(-center[0], -center[1], -center[2]) * \
