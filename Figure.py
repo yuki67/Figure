@@ -11,14 +11,6 @@ class Figure(object):
     核となるのはget_iter()関数である
     """
 
-    def __init__(self, made_from=()):
-        """ made_from: 変形される前の図形がなんであったかを記憶する """
-        self.made_from = made_from
-
-    def get_iter(self):
-        """ selfを構成する部分図形が詰まったイテレータを"新しく作って"返す """
-        pass
-
     def __iter__(self):
         return self.get_iter()
 
@@ -26,13 +18,17 @@ class Figure(object):
         """ selfを構成する部分図形が詰まったリストを返す """
         return list(self.get_iter())
 
+    def get_iter(self):
+        """ selfを構成する部分図形が詰まったイテレータを"新しく作って"返す """
+        pass
+
     def transformed(self, mat):
         """ selfを行列matで変形してものを返す """
-        class Temp(Figure):
+        pass
 
-            def get_iter(_self):
-                return (x.transformed(mat) for x in self)
-        return Temp((self.__class__,))
+    def projected(self):
+        """ xy平面に並行投影された図形を返す """
+        pass
 
 
 def figure_union(figures):
@@ -74,7 +70,7 @@ class Point(list, Figure):
 
     def __init__(self, lst):
         super().__init__(lst)
-        Figure.__init__(self, (Point,))
+        Figure.__init__(self)
 
     def __repr__(self):
         return "Point(%s)" % str(list(self))
@@ -121,7 +117,7 @@ class Line(Figure):
         self.a = a
         self.b = b
         self.max = max([abs(i - j) for i, j in zip(self.a, self.b)])
-        super().__init__((Line,))
+        super().__init__()
 
     def get_iter(self):
         """
@@ -164,7 +160,7 @@ class Polygon(Figure):
 
     def __init__(self, points):
         self.points = points
-        super().__init__((Polygon,))
+        super().__init__()
 
     def get_iter(self):
         """
@@ -277,7 +273,7 @@ class Fractal(Figure):
         self.n = n
         self.each = each
         self.init_generator = init_generator if init_generator else generator
-        super().__init__((Fractal,))
+        super().__init__()
 
     def get_iter(self):
         """

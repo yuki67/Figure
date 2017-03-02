@@ -67,9 +67,7 @@ def save_fractal_gif(fractal, filename, width, height, duration=100, loop=0xffff
             """ canvasにfigureを描く """
             super().draw(figure)
             # イニシエータを書いたらgif_imagesに保存する
-            # イニシエータを書いたとき必ずしもinitiator.__class__ == figure.__class__でないので、
-            # figure.made_dromを使って判定を行う点に注意
-            if initiator_class in figure.made_from or initiator_class == figure.__class__:
+            if figure.__class__ == initiator_class:
                 gif_images.append(self.canvas.copy())
 
     AnxiousPainter(img).draw(fractal)
