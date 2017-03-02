@@ -56,6 +56,7 @@ class Point(list, Figure):
     """
     n次元平面上の点
     行列との乗算をサポートするが、保持する値はn個だけ
+    最も基本的な図形なので、get_iter()は存在しない(点は分解のしようがない)
 
     >>> a = Point([1.0, 2.0])
     >>> a[0]
@@ -98,6 +99,12 @@ class Point(list, Figure):
         temp = list.__add__(self, [1.0])
         return Point([mat[i][-1] + sum([temp[j] * mat[j][i] for j in range(len(mat[i]))]) for i in range(len(mat) - 1)])
 
+    def transformed(self, mat):
+        return Point(self * mat)
+
+    def projected(self):
+        return Point(self[:-1])
+
     def scaled(self, r):
         """
         座標をr倍した点を返す
@@ -105,9 +112,6 @@ class Point(list, Figure):
         Point([1.5, 2.0])
         """
         return Point([r * x for x in self])
-
-    def transformed(self, mat):
-        return Point(self * mat)
 
 
 class Line(Figure):
@@ -118,6 +122,9 @@ class Line(Figure):
         self.b = b
         self.max = max([abs(i - j) for i, j in zip(self.a, self.b)])
         super().__init__()
+
+    def __repr__(self):
+        return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
 
     def get_iter(self):
         """
@@ -132,18 +139,6 @@ class Line(Figure):
         else:
             return (self.a + (self.b - self.a).scaled(i / self.max) for i in range(int(self.max) + 1))
 
-    def __repr__(self):
-        return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
-
-    def mid(self):
-        """
-        線分の中点を返す
-
-        >>> Line(Point([0.0, 3.0]), Point([6.0, 0.0])).mid()
-        Point([3.0, 1.5])
-        """
-        return Point([a / 2 for a in self.a + self.b])
-
     def transformed(self, mat):
         """
         線分を変換するには、端点を変換する
@@ -154,6 +149,18 @@ class Line(Figure):
         """
         return Line(self.a.transformed(mat), self.b.transformed(mat))
 
+    def projected(self):
+        return Line(self.a.projected(), self.b.projected())
+
+    def mid(self):
+        """
+        線分の中点を返す
+
+        >>> Line(Point([0.0, 3.0]), Point([6.0, 0.0])).mid()
+        Point([3.0, 1.5])
+        """
+        return Point([a / 2 for a in self.a + self.b])
+
 
 class Polygon(Figure):
     """ 多角形 """
@@ -161,6 +168,9 @@ class Polygon(Figure):
     def __init__(self, points):
         self.points = points
         super().__init__()
+
+    def __repr__(self):
+        return "Polygon(%s)" % str(self.points)
 
     def get_iter(self):
         """
@@ -172,16 +182,6 @@ class Polygon(Figure):
         """
         return (Line(self.points[i - 1], self.points[i]) for i in range(len(self.points)))
 
-    def get_points(self):
-        """
-        Polygonの制御点を返す
-
-        >>> a = Polygon([Point([0, 0]), Point([0, 10]), Point([10, 0])])
-        >>> a.get_points()
-        [Point([0, 0]), Point([0, 10]), Point([10, 0])]
-        """
-        return self.points
-
     def transformed(self, mat):
         """
         >>> points = [Point([0, 0]), Point([0, 10]), Point([10, 0])]
@@ -191,8 +191,18 @@ class Polygon(Figure):
         """
         return Polygon([p.transformed(mat) for p in self.points])
 
-    def __repr__(self):
-        return "Polygon(%s)" % str(self.points)
+    def projected(self):
+        return Polygon([p.transformed() for p in self.points])
+
+    def get_points(self):
+        """
+        Polygonの制御点を返す
+
+        >>> a = Polygon([Point([0, 0]), Point([0, 10]), Point([10, 0])])
+        >>> a.get_points()
+        [Point([0, 0]), Point([0, 10]), Point([10, 0])]
+        """
+        return self.points
 
 
 class Ellipse(Polygon):
@@ -282,10 +292,10 @@ class Fractal(Figure):
         [Line(Point([0.0, 0.0]), Point([10.0, 10.0])), Line(Point([0.0, 1.0]), Point([10.0, 11.0]))]
         """
         if self.n == 0:
-            return (self.initiator for i in range(1))
+            return iter((self.initiator,))
         if self.n == 1:
             if self.each:
-                return chain((self.initiator for i in range(1)),
+                return chain(iter((self.initiator,)),
                              (self.initiator.transformed(gen) for gen in self.generator))
             else:
                 return (self.initiator.transformed(gen) for gen in self.generator)
@@ -293,6 +303,12 @@ class Fractal(Figure):
             return chain((self.initiator.transformed(gen) for gen in self.generator),
                          (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator))
         return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
+
+    def transformed(self, mat):
+        return Fractal(self.initiator.transformed(mat), self.generator, self.n, self.each)
+
+    def projected(self):
+        return Fractal(self.initiator.projected(), self.generator, self.n, self.each)
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
