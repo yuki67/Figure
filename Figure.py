@@ -32,18 +32,7 @@ class Figure(object):
 
 
 def figure_union(figures):
-    """
-    figuresに含まれる図形をひとまとめにした図形を返す
-
-    >>> a = Line(Point([0.0, 0.0]), Point([10.0, 10.0]))
-    >>> b = Line(Point([10.0, 0.0]), Point([0.0, 10.0]))
-    >>> c = Circle(Point([0.5, 0.5]), 4)
-    >>> for f in figure_union((a, b, c)):
-    ...     print(f)
-    Line(Point([0.0, 0.0]), Point([10.0, 10.0]))
-    Line(Point([10.0, 0.0]), Point([0.0, 10.0]))
-    Circle(Point([0.5, 0.5]), 4)
-    """
+    """ figuresに含まれる図形をひとまとめにした図形を返す """
 
     class Temp(Figure):
 
@@ -53,10 +42,8 @@ def figure_union(figures):
 
 
 class Point(list, Figure):
-    """
-    n次元平面上の点
-    最も基本的な図形なので、get_iter()は存在しない(点は分解のしようがない)
-    """
+    """ n次元平面上の点 """
+    # 最も基本的な図形なので、get_iter()は存在しない(点は分解のしようがない)
 
     def __init__(self, lst):
         super().__init__(lst)
@@ -66,25 +53,13 @@ class Point(list, Figure):
         return "Point(%s)" % str(list(self))
 
     def __add__(self, other):
-        """
-        >>> Point([1.0, 2.0]) + Point([3.0, 5.0])
-        Point([4.0, 7.0])
-        """
         return Point([a + b for a, b in zip(self, other)])
 
     def __sub__(self, other):
-        """
-        >>> Point([1.0, 2.0]) - Point([3.0, 5.0])
-        Point([-2.0, -3.0])
-        """
         return Point([a - b for a, b in zip(self, other)])
 
     def __mul__(self, mat):
-        """
-        行列との積
-        >>> Point([1.0, 2.0]) * Matrix.affine2D(swap=[True, True], trans=[2.0, 3.0])
-        Point([1.0, 1.0])
-        """
+        """ 行列との積 """
         temp = list.__add__(self, [1.0])
         return Point([mat[i][-1] + sum([temp[j] * mat[j][i] for j in range(len(mat[i]))]) for i in range(len(mat) - 1)])
 
@@ -116,12 +91,6 @@ class Line(Figure):
         return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
 
     def get_iter(self):
-        """
-        >>> list(Line(Point([0.0, 0.0]), Point([0.0, 0.0])))
-        []
-        >>> list(Line(Point([0.0, 4.0]), Point([2.0, 0.0])))
-        [Point([0.0, 4.0]), Point([0.5, 3.0]), Point([1.0, 2.0]), Point([1.5, 1.0]), Point([2.0, 0.0])]
-        """
         if self.max == 0:
             # 何もしないイテレータ
             return iter(())
@@ -129,21 +98,13 @@ class Line(Figure):
             return (self.a + (self.b - self.a).scaled(i / self.max) for i in range(int(self.max) + 1))
 
     def transformed(self, mat):
-        """
-        線分を変換するには、端点を変換する
-
-        >>> mat = Matrix.affine2D(scale=[0.25, 0.25])
-        >>> Line(Point([4.0, 4.0]), Point([-4.0, -4.0])).transformed(mat)
-        Line(Point([1.0, 1.0]), Point([-1.0, -1.0]))
-        """
         return Line(self.a.transformed(mat), self.b.transformed(mat))
 
     def projected(self):
         return Line(self.a.projected(), self.b.projected())
 
     def mid(self):
-        """
-        線分の中点を返す
+        """ 線分の中点を返す
 
         >>> Line(Point([0.0, 3.0]), Point([6.0, 0.0])).mid()
         Point([3.0, 1.5])
@@ -165,25 +126,13 @@ class Polygon(Figure):
         return (Line(self.points[i - 1], self.points[i]) for i in range(len(self.points)))
 
     def transformed(self, mat):
-        """
-        >>> points = [Point([0, 0]), Point([0, 10]), Point([10, 0])]
-        >>> poly = Polygon(points)
-        >>> poly.transformed(Matrix.affine2D(rot=pi/2, scale=[0.25, 0.25], trans=[15.0, -15.0]))
-        Polygon([Point([15.0, -15.0]), Point([12.5, -15.0]), Point([15.0, -12.5])])
-        """
         return Polygon([p.transformed(mat) for p in self.points])
 
     def projected(self):
         return Polygon([p.transformed() for p in self.points])
 
     def get_points(self):
-        """
-        Polygonの制御点を返す
-
-        >>> a = Polygon([Point([0, 0]), Point([0, 10]), Point([10, 0])])
-        >>> a.get_points()
-        [Point([0, 0]), Point([0, 10]), Point([10, 0])]
-        """
+        """ Polygonの制御点を返す """
         return self.points
 
 
@@ -251,12 +200,6 @@ class Fractal(Figure):
         super().__init__()
 
     def get_iter(self):
-        """
-        >>> mats = [Matrix.affine2D(trans=[0.0, i]) for i in range(2)]
-        >>> f = Fractal(Line(Point([0.0, 0.0]), Point([10.0, 10.0])), mats, 1, False)
-        >>> list(f)
-        [Line(Point([0.0, 0.0]), Point([10.0, 10.0])), Line(Point([0.0, 1.0]), Point([10.0, 11.0]))]
-        """
         if self.each:
             return (Fractal(self.initiator, self.init_generator, n, False, self.init_generator) for n in range(self.n + 1))
         if self.n == 0:
