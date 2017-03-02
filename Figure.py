@@ -27,7 +27,7 @@ class Figure(object):
         pass
 
     def projected(self):
-        """ xy平面に並行投影された図形を返す """
+        """ ひとつ下の次元に平行投影された図形を返す """
         pass
 
 
@@ -55,18 +55,7 @@ def figure_union(figures):
 class Point(list, Figure):
     """
     n次元平面上の点
-    行列との乗算をサポートするが、保持する値はn個だけ
     最も基本的な図形なので、get_iter()は存在しない(点は分解のしようがない)
-
-    >>> a = Point([1.0, 2.0])
-    >>> a[0]
-    1.0
-    >>> a[1]
-    2.0
-    >>> a[2]
-    Traceback (most recent call last):
-    ...
-    IndexError: list index out of range
     """
 
     def __init__(self, lst):
@@ -143,9 +132,9 @@ class Line(Figure):
         """
         線分を変換するには、端点を変換する
 
-        >>> mat = Matrix.affine2D(center=[4.0, 2.0], scale=[0.25, 0.25])
-        >>> Line(Point([0.0, 4.0]), Point([8.0, 0.0])).transformed(mat)
-        Line(Point([3.0, 2.5]), Point([5.0, 1.5]))
+        >>> mat = Matrix.affine2D(scale=[0.25, 0.25])
+        >>> Line(Point([4.0, 4.0]), Point([-4.0, -4.0])).transformed(mat)
+        Line(Point([1.0, 1.0]), Point([-1.0, -1.0]))
         """
         return Line(self.a.transformed(mat), self.b.transformed(mat))
 
@@ -173,13 +162,6 @@ class Polygon(Figure):
         return "Polygon(%s)" % str(self.points)
 
     def get_iter(self):
-        """
-        >>> points = [Point([i, i**2]) for i in range(3)]
-        >>> points
-        [Point([0, 0]), Point([1, 1]), Point([2, 4])]
-        >>> list(Polygon(points))
-        [Line(Point([2, 4]), Point([0, 0])), Line(Point([0, 0]), Point([1, 1])), Line(Point([1, 1]), Point([2, 4]))]
-        """
         return (Line(self.points[i - 1], self.points[i]) for i in range(len(self.points)))
 
     def transformed(self, mat):
@@ -226,13 +208,6 @@ class Ellipse(Polygon):
         return "Ellipse(%s, %s, %s)" % (self.center, self.a, self.b)
 
     def transformed(self, mat):
-        """
-        >>> ellipse = Ellipse(Point([0.0, 0.0]), 3.0, 4.0, 4).transformed(Matrix.affine2D(trans=[2.0, 2.0]))
-        >>> type(ellipse)
-        <class '__main__.Ellipse'>
-        >>> ellipse.get_points()
-        [Point([5.0, 2.0]), Point([2.0, 6.0]), Point([-1.0, 2.0000000000000004]), Point([1.9999999999999996, -2.0])]
-        """
         return Ellipse([p.transformed(mat) for p in self.points], n=self.n)
 
 
@@ -252,17 +227,6 @@ class Circle(Ellipse):
         """
         演習をn分割するの点を返す
         stand=Trueの場合、n角形が立つように回転させてから返す
-
-        >>> for p in Circle(Point([0.0, 0.0]), 10.0).circle_points(4): print(p)
-        Point([10.0, 0.0])
-        Point([6.123233995736766e-16, 10.0])
-        Point([-10.0, 1.2246467991473533e-15])
-        Point([-1.8369701987210296e-15, -10.0])
-        >>> for p in Circle(Point([0.0, 0.0]), 10.0).circle_points(4, True): print(p)
-        Point([-3.826834323650897, -9.238795325112868])
-        Point([9.238795325112868, -3.8268343236508975])
-        Point([3.8268343236508984, 9.238795325112868])
-        Point([-9.238795325112868, 3.826834323650899])
         """
         if stand:
             return [Point([self.a * cos(2 * pi * i / n) + self.center[0],
@@ -289,7 +253,8 @@ class Fractal(Figure):
     def get_iter(self):
         """
         >>> mats = [Matrix.affine2D(trans=[0.0, i]) for i in range(2)]
-        >>> list(Fractal(Line(Point([0.0, 0.0]), Point([10.0, 10.0])), mats, 1, False))
+        >>> f = Fractal(Line(Point([0.0, 0.0]), Point([10.0, 10.0])), mats, 1, False)
+        >>> list(f)
         [Line(Point([0.0, 0.0]), Point([10.0, 10.0])), Line(Point([0.0, 1.0]), Point([10.0, 11.0]))]
         """
         if self.each:
@@ -313,3 +278,4 @@ class Fractal(Figure):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+    doctest.testfile("FigureTest.txt")
