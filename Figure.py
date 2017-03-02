@@ -278,6 +278,7 @@ class Fractal(Figure):
     """ フラクタル """
 
     def __init__(self, initiator, generator, n, each=False, init_generator=False):
+        # init_generatorはget_iter()からの再帰呼び出しでのみ使われる
         self.initiator = initiator
         self.generator = generator
         self.n = n
@@ -291,18 +292,14 @@ class Fractal(Figure):
         >>> list(Fractal(Line(Point([0.0, 0.0]), Point([10.0, 10.0])), mats, 1, False))
         [Line(Point([0.0, 0.0]), Point([10.0, 10.0])), Line(Point([0.0, 1.0]), Point([10.0, 11.0]))]
         """
+        if self.each:
+            return (Fractal(self.initiator, self.init_generator, n, False, self.init_generator) for n in range(self.n + 1))
         if self.n == 0:
             return iter((self.initiator,))
         if self.n == 1:
-            if self.each:
-                return chain(iter((self.initiator,)),
-                             (self.initiator.transformed(gen) for gen in self.generator))
-            else:
-                return (self.initiator.transformed(gen) for gen in self.generator)
-        if self.each:
-            return chain((self.initiator.transformed(gen) for gen in self.generator),
-                         (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator))
-        return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
+            return (self.initiator.transformed(gen) for gen in self.generator)
+        else:
+            return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
 
     def transformed(self, mat):
         return Fractal(self.initiator.transformed(mat), self.generator, self.n, self.each)
