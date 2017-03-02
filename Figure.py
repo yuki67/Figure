@@ -1,8 +1,6 @@
 from itertools import chain
-from math import ceil, pi, sin, cos
+from math import pi, sin, cos
 from MyMatrix import Matrix
-
-transform = Matrix.identity(3)
 
 
 class Figure(object):
