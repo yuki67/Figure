@@ -24,10 +24,6 @@ class Figure(object):
         """ selfを行列matで変形してものを返す """
         pass
 
-    def projected(self, proj_mat):
-        """ ひとつ下の次元に透視変換された図形を返す """
-        pass
-
 
 class UnionFigure(Figure):
     """ 複数の図形をひとまとめにした図形 """
@@ -40,10 +36,7 @@ class UnionFigure(Figure):
         return (f for f in self.figures)
 
     def transformed(self, mat):
-        return (f.transformed(mat) for f in self.figures)
-
-    def projected(self, proj_mat):
-        return (f.proj_mat() for f in self.figures)
+        return UnionFigure((f.transformed(mat) for f in self.figures))
 
 
 class Point(list, Figure):
@@ -58,23 +51,23 @@ class Point(list, Figure):
         return "Point(%s)" % str(list(self))
 
     def __add__(self, other):
-        return Point([a + b for a, b in zip(self, other)])
+        return Point([a + b for a, b in zip(self[:-1], other[:-1])] + [1.0])
 
     def __sub__(self, other):
-        return Point([a - b for a, b in zip(self, other)])
+        return Point([a - b for a, b in zip(self[:-1], other[:-1])] + [1.0])
 
     def __mul__(self, mat):
         """ 行列との積 """
-        temp = list.__add__(self, [1.0])
-        return Point([mat[i][-1] + sum([temp[j] * mat[j][i] for j in range(len(mat[i]))]) for i in range(len(mat) - 1)])
+        return Point([sum([self[j] * mat[j][i] for j in range(len(mat[i]))]) for i in range(len(mat))]).regularized()
+
+    def regularized(self):
+        """ 最後の要素を1.0にした、斉次座標として等しい点を返す 
+        >>> Point([1.0, 2.0, 3.0, 4.0]).regularized()
+        """
+        return Point([x / self[-1] for x in self])
 
     def transformed(self, mat):
         return Point(self * mat)
-
-    def projected(self, proj_mat):
-        temp = list.__add__(self, [1.0])
-        temp = Point([sum([temp[j] * proj_mat[j][i] for j in range(len(proj_mat[i]))]) for i in range(len(proj_mat))])
-        return Point([x / temp[-1] for x in temp[:-2]])
 
     def scaled(self, r):
         """
@@ -82,7 +75,21 @@ class Point(list, Figure):
         >>> Point([3.0, 4.0]).scaled(0.5)
         Point([1.5, 2.0])
         """
-        return Point([r * x for x in self])
+        return Point([r * x for x in self[:-1]] + [1.0])
+
+
+class Point2D(Point):
+
+    def __init__(self, lst):
+        assert len(lst) == 2
+        super().__init__(lst + [1.0])
+
+
+class Point3D(Point):
+
+    def __init__(self, lst):
+        assert len(lst) == 3
+        super().__init__(lst + [1.0])
 
 
 class Line(Figure):
@@ -107,16 +114,13 @@ class Line(Figure):
     def transformed(self, mat):
         return Line(self.a.transformed(mat), self.b.transformed(mat))
 
-    def projected(self, proj_mat):
-        return Line(self.a.projected(proj_mat), self.b.projected(proj_mat))
-
     def mid(self):
         """ 線分の中点を返す
 
         >>> Line(Point([0.0, 3.0]), Point([6.0, 0.0])).mid()
         Point([3.0, 1.5])
         """
-        return Point([a / 2 for a in self.a + self.b])
+        return (self.a + self.b).scaled(0.5)
 
 
 class Polygon(Figure):
@@ -133,10 +137,7 @@ class Polygon(Figure):
         return (Line(self.points[i - 1], self.points[i]) for i in range(len(self.points)))
 
     def transformed(self, mat):
-        return Polygon([p.transformed(mat) for p in self.points])
-
-    def projected(self, proj_mat):
-        return Polygon([p.projected(proj_mat) for p in self.points])
+        return self.__class__([p.transformed(mat) for p in self.points])
 
     def get_points(self):
         """ Polygonの制御点を返す """
@@ -156,8 +157,8 @@ class Ellipse(Polygon):
             self.a = a
             self.b = b
             self.n = n
-            points = [Point([self.center[0] + self.a * cos(theta * 2 / n * pi),
-                             self.center[1] + self.b * sin(theta * 2 / n * pi)]) for theta in range(self.n)]
+            points = [Point2D([self.center[0] + self.a * cos(theta * 2 / n * pi),
+                               self.center[1] + self.b * sin(theta * 2 / n * pi)]) for theta in range(self.n)]
             super().__init__(points)
 
     def __repr__(self):
@@ -173,22 +174,19 @@ class Circle(Ellipse):
     def __repr__(self):
         return "Circle(%s, %s)" % (str(self.center), str(self.a))
 
-    def transformed(self, mat):
-        return Circle(self.center * mat, self.a * mat[0][0])
-
     def circle_points(self, n, stand=False):
         """
         演習をn分割するの点を返す
         stand=Trueの場合、n角形が立つように回転させてから返す
         """
         if stand:
-            return [Point([self.a * cos(2 * pi * i / n) + self.center[0],
-                           self.a * sin(2 * pi * i / n) + self.center[1]
-                           ]) * Matrix.affine2D(self.center, rot=-pi + pi / 2 * 3 / n) for i in range(n)]
+            return [Point2D([self.a * cos(2 * pi * i / n) + self.center[0],
+                             self.a * sin(2 * pi * i / n) + self.center[1]
+                             ]) * Matrix.affine2D(self.center, rot=-pi + pi / 2 * 3 / n) for i in range(n)]
         else:
-            return [Point([self.a * cos(2 * pi * i / n) + self.center[0],
-                           self.a * sin(2 * pi * i / n) + self.center[1]
-                           ]) for i in range(n)]
+            return [Point2D([self.a * cos(2 * pi * i / n) + self.center[0],
+                             self.a * sin(2 * pi * i / n) + self.center[1]
+                             ]) for i in range(n)]
 
 
 class Fractal(Figure):
@@ -214,17 +212,7 @@ class Fractal(Figure):
             return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
 
     def transformed(self, mat):
-        return Fractal(self.initiator.transformed(mat), self.generator, self.n, self.each)
-
-    def projected(self, proj_mat):
-        if self.each:
-            return UnionFigure((Fractal(self.initiator, self.init_generator, n, False, self.init_generator).projected(proj_mat) for n in range(self.n + 1)))
-        if self.n == 0:
-            return self.initiator.projected(proj_mat)
-        if self.n == 1:
-            return UnionFigure((self.initiator.transformed(gen).projected(proj_mat) for gen in self.generator))
-        else:
-            return UnionFigure((Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator).projected(proj_mat) for mat in self.generator))
+        return Fractal(self.initiator.transformed(mat), self.generator, self.n, self.each, self.generator)
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
