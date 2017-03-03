@@ -1,13 +1,19 @@
 from PIL import ImageDraw, Image
 from Figure import Point, Line, Fractal
+from MyMatrix import Matrix
+from Renderer import Renderer
 
 
-class JPGPainter(object):
-    """ PillowのImage用のPainter """
+class JPGRenderer(Renderer):
+    """ PillowのImage用のRenderer """
 
     def __init__(self, img):
         self.canvas = img
         self.drawer = ImageDraw.Draw(img)
+        width, height = img.size
+        proj = Matrix.projection3D(9.9, 50, -10, -10, 10, 10)
+        screen = Matrix.affine3D(center=(0.0, 0.0, 0.0), scale=(width / 2, height / 2, 1.0), trans=(width / 2, height / 2, 0.0))
+        super().__init__(proj, screen)
 
     def put_pixel(self, point):
         """ canvasにpointを描画する """
@@ -15,23 +21,19 @@ class JPGPainter(object):
             self.canvas.putpixel((int(point[0]), int(point[1])),
                                  (0, 0, 0))
 
-    def draw_line(self, line):
+    def render_line(self, line):
         """ canvasにlineを描画する """
         self.drawer.line([*line.a[:2], *line.b[:2]], fill="black")
 
-    def split_and_draw(self, figure):
-        """ figureを分解して描く """
-        for sub_figure in figure:
-            self.draw(sub_figure)
-
-    def draw(self, figure):
+    def render(self, figure):
         """ canvasにfigureを描く """
         if isinstance(figure, Point):
-            self.put_pixel(figure)
+            self.put_pixel(figure.transformed(self.bootstrap * self.world_to_screen))
         elif isinstance(figure, Line):
-            self.draw_line(figure)
+            self.render_line(figure.transformed(self.bootstrap * self.world_to_screen))
         else:
-            self.split_and_draw(figure)
+            for sub_figure in figure:
+                self.render(sub_figure)
 
 
 def save_gif(figure, filename, width, height, duration=100, loop=True):
@@ -40,15 +42,15 @@ def save_gif(figure, filename, width, height, duration=100, loop=True):
     img = Image.new("RGB", (width + 1, height + 1), "white")
     gif_images = []
 
-    class AnxiousPainter(JPGPainter):
-        """ drawするたびにgif_imagesに画像のコピーを追加するようにしたJPGPainter """
+    class AnxiousRenderer(JPGRenderer):
+        """ renderするたびにgif_imagesに画像のコピーを追加するようにしたJPGRenderer """
 
-        def draw(self, figure):
+        def render(self, figure):
             """ canvasにfigureを描く """
-            super().draw(figure)
+            super().render(figure)
             gif_images.append(self.canvas.copy())
 
-    AnxiousPainter(img).draw(figure)
+    AnxiousRenderer(img).render(figure)
     # サイズを小さくしたいのは山々だが、optimizeをFalse以外にすると画像が壊れる(Pillowのバグ)
     Image.new("RGB", (width + 1, height + 1), "white").save(filename, save_all=True, append_images=gif_images, loop=loop, duration=duration, optimize=False)
 
@@ -59,17 +61,17 @@ def save_fractal_gif(fractal, filename, width, height, duration=100, loop=0xffff
     initiator_class = fractal.initiator.__class__
     gif_images = []
 
-    class AnxiousPainter(JPGPainter):
-        """ fractal.initiatorを書くたびにgif_imagesに画像のコピーを追加するJPGPainter """
+    class AnxiousRenderer(JPGRenderer):
+        """ fractal.initiatorを書くたびにgif_imagesに画像のコピーを追加するJPGRenderer """
         n = 0
 
-        def draw(self, figure):
+        def render(self, figure):
             """ canvasにfigureを描く """
-            super().draw(figure)
+            super().render(figure)
             # イニシエータを書いたらgif_imagesに保存する
             if figure.__class__ == initiator_class:
                 gif_images.append(self.canvas.copy())
 
-    AnxiousPainter(img).draw(fractal)
+    AnxiousRenderer(img).render(fractal)
     # サイズを小さくしたいのは山々だが、optimizeをFalse以外にすると画像が壊れる(Pillowのバグ)
     Image.new("RGB", (width + 1, height + 1), "white").save(filename, save_all=True, append_images=gif_images, loop=loop, duration=duration, optimize=False)
