@@ -192,27 +192,35 @@ class Circle(Ellipse):
 class Fractal(Figure):
     """ フラクタル """
 
-    def __init__(self, initiator, generator, n, each=False, init_generator=False):
+    def __init__(self, initiator, generator, n, each=False, init_generator=None, last_transform=None):
         # init_generatorはget_iter()からの再帰呼び出しでのみ使われる
+        # last_transformはFractal.transformed()でのみ指定される
         self.initiator = initiator
         self.generator = generator
         self.n = n
         self.each = each
         self.init_generator = init_generator if init_generator else generator
+        self.last_transform = last_transform
         super().__init__()
 
     def get_iter(self):
         if self.each:
-            return (Fractal(self.initiator, self.init_generator, n, False, self.init_generator) for n in range(self.n + 1))
+            return (Fractal(self.initiator, self.init_generator, n, False, self.init_generator, self.last_transform) for n in range(self.n + 1))
         if self.n == 0:
-            return iter((self.initiator,))
+            if self.last_transform:
+                return iter((self.initiator.transformed(self.last_transform),))
+            else:
+                return iter((self.initiator,))
         if self.n == 1:
-            return (self.initiator.transformed(gen) for gen in self.generator)
+            if self.last_transform:
+                return (self.initiator.transformed(gen * self.last_transform) for gen in self.generator)
+            else:
+                return (self.initiator.transformed(gen) for gen in self.generator)
         else:
-            return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
+            return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator, self.last_transform) for mat in self.generator)
 
     def transformed(self, mat):
-        return Fractal(self.initiator.transformed(mat), self.generator, self.n, self.each, self.generator)
+        return Fractal(self.initiator, self.generator, self.n, self.each, self.generator, mat)
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
