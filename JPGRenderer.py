@@ -4,16 +4,16 @@ from MyMatrix import Matrix
 from Renderer import Renderer
 
 
-class JPGRenderer(Renderer):
-    """ PillowのImage用のRenderer """
+class _JPGRenderer(Renderer):
+    """
+    FigureをJPGに描画するクラスの基底
+    他のファイルからインポートするべきではない
+    """
 
-    def __init__(self, img):
+    def __init__(self, img, screen_mat):
+        super().__init__(screen_mat)
         self.canvas = img
         self.drawer = ImageDraw.Draw(img)
-        width, height = img.size
-        proj = Matrix.projection3D(9.9, 50, -10, -10, 10, 10)
-        screen = Matrix.affine3D(center=(0.0, 0.0, 0.0), scale=(width / 2, height / 2, 1.0), trans=(width / 2, height / 2, 0.0))
-        super().__init__(proj, screen)
 
     def put_pixel(self, point):
         """ canvasにpointを描画する """
@@ -28,12 +28,29 @@ class JPGRenderer(Renderer):
     def render(self, figure):
         """ canvasにfigureを描く """
         if isinstance(figure, Point):
-            self.put_pixel(figure.transformed(self.bootstrap * self.world_to_screen))
+            self.put_pixel(figure.transformed(self.screen_mat))
         elif isinstance(figure, Line):
-            self.render_line(figure.transformed(self.bootstrap * self.world_to_screen))
+            self.render_line(figure.transformed(self.screen_mat))
         else:
             for sub_figure in figure:
                 self.render(sub_figure)
+
+
+class JPGRenderer3D(_JPGRenderer):
+    """ 3DのFigureをJPGに描画する """
+
+    def __init__(self, img):
+        width, height = img.size
+        proj = Matrix.projection3D(9.9, 50, -10, -10, 10, 10)
+        screen = Matrix.affine3D(center=(0.0, 0.0, 0.0), scale=(width / 2, height / 2, 1.0), trans=(width / 2, height / 2, 0.0))
+        super().__init__(img, proj * screen)
+
+
+class JPGRenderer2D(_JPGRenderer):
+    """ 2DのFigureをJPGに描画する """
+
+    def __init__(self, img):
+        super().__init__(img, Matrix.identity(3))
 
 
 def save_gif(figure, filename, width, height, duration=100, loop=True):

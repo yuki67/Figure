@@ -3,8 +3,8 @@ import os
 from math import pi
 from PIL import Image
 import Figure
-from Figure import Line, Point, Fractal, Polygon, Circle, Ellipse
-from JPGPainter import JPGPainter
+from Figure import Point2D, Line, Fractal, Polygon, Circle, Ellipse
+from JPGRenderer import JPGRenderer2D
 from MyMatrix import Matrix
 
 
@@ -91,10 +91,10 @@ class KochCurve(Fractal):
     def __init__(self, line, n, each=False):
         r = 1 / 3
         args = [
-            [line.a, 0.0, [r, r], Point([0.0, 0.0])],
+            [line.a, 0.0, [r, r], Point2D([0.0, 0.0])],
             [line.a, -pi / 3, [r, r], (line.b - line.a).scaled(r)],
             [line.b, pi / 3, [r, r], (line.a - line.b).scaled(r)],
-            [line.b, 0.0, [r, r], Point([0.0, 0.0])],
+            [line.b, 0.0, [r, r], Point2D([0.0, 0.0])],
         ]
         generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
         super().__init__(line, generator, n, each)
@@ -106,7 +106,7 @@ class DragonCurve(Fractal):
     def __init__(self, line, n, each=True):
         r = 2 ** -0.5
         args = [
-            [line.a, -pi / 4, [r, r], Point([0.0, 0.0])],
+            [line.a, -pi / 4, [r, r], Point2D([0.0, 0.0])],
             [line.a, -pi / 4 * 3, [r, r], line.b - line.a],
         ]
         generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
@@ -117,7 +117,7 @@ class SierpinskiGasket(Fractal):
     """ シェルピンスキーのギャスケット """
 
     def __init__(self, points, n):
-        center = sum(points, Point([0.0, 0.0])).scaled(1 / len(points))
+        center = sum(points, Point2D([0.0, 0.0])).scaled(1 / len(points))
         args = [
             [center, 0.0, [0.5, 0.5], (p - center).scaled(0.5)] for p in points
         ]
@@ -140,9 +140,9 @@ class OneLineSweeping(Fractal):
     def __init__(self, line, n, each=True):
         p = (line.b - line.a).scaled(0.5)
         args = [
-            [line.a, -pi / 4, [2**-0.5, 2**-0.5], Point([0.0, 0.0]), [False, True]],
-            [line.a, 0, [0.5, 0.5], Point([p[1], -p[0]]) + p, [False, False]],
-            [line.b, pi / 2, [0.5, 0.5], Point([p[1], -p[0]]), [True, True]],
+            [line.a, -pi / 4, [2**-0.5, 2**-0.5], Point2D([0.0, 0.0]), [False, True]],
+            [line.a, 0, [0.5, 0.5], Point2D([p[1], -p[0]]) + p, [False, False]],
+            [line.b, pi / 2, [0.5, 0.5], Point2D([p[1], -p[0]]), [True, True]],
         ]
         generator = [Matrix.affine2D(c, r, s, t, m) for c, r, s, t, m in args]
         super().__init__(line, generator, n, each)
@@ -153,11 +153,11 @@ def demo():
     rad = min(width, height) / 2
     gl_mat = Matrix.scale2D(width, height)
 
-    center = Point([0.5, 0.5]).transformed(gl_mat)
+    center = Point2D([0.5, 0.5]).transformed(gl_mat)
     circle = Circle(center, rad)
     ellipse = Ellipse(center, rad, rad / 2)
-    line = Line(Point([0.05, 0.5]), Point([0.95, 0.5])).transformed(gl_mat)
-    bottom_line = Line(Point([0.05, 0.95]), Point([0.95, 0.95])).transformed(gl_mat)
+    line = Line(Point2D([0.05, 0.5]), Point2D([0.95, 0.5])).transformed(gl_mat)
+    bottom_line = Line(Point2D([0.05, 0.95]), Point2D([0.95, 0.95])).transformed(gl_mat)
     exhibits = [
         [Diamond, [circle, 32]],
         [Cardioid, [circle, 256]],
@@ -169,17 +169,17 @@ def demo():
         [KochCurve, [line, 6, False]],
         [SierpinskiGasket, [circle.circle_points(3, True), 7]],
         [Donuts, [ellipse, 100]],
-        [DragonCurve, [line.transformed(Matrix.affine2D(center=line.mid(), scale=[0.6, 0.6])), 15, False]],
+        [DragonCurve, [line.transformed(Matrix.affine2D(center=line.mid(), scale=[0.6, 0.6])), 12, False]],
         [OneLineSweeping, [bottom_line, 8, False]],
     ]
 
     for exhibit, args in exhibits:
         img = Image.new("RGB", (width + 1, height + 1), "white")
-        painter = JPGPainter(img)
+        painter = JPGRenderer2D(img)
 
         figure = exhibit(*args)
         print("%s begin." % figure.__class__.__name__)
-        painter.draw(figure)
+        painter.render(figure)
 
         filename = os.path.join("Gallery", figure.__class__.__name__) + ".jpg"
         img.save(filename)

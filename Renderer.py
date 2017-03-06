@@ -4,9 +4,8 @@ from MyMatrix import Matrix
 
 class Renderer(object):
 
-    def __init__(self, proj, screen):
-        self.bootstrap = Matrix.identity(len(proj))
-        self.world_to_screen = proj * screen
+    def __init__(self, screen_mat):
+        self.screen_mat = screen_mat
 
     def put_pixel(self, point):
         """ ドットを受け取る """
@@ -14,8 +13,4 @@ class Renderer(object):
 
     def render(self, figure):
         """ figureの座標を変換して描画関数に渡す """
-        if isinstance(figure, Point):
-            self.put_pixel(figure.transformed(self.bootstrap * self.world_to_screen))
-        else:
-            for sub_figure in figure:
-                self.render(sub_figure)
+        pass
