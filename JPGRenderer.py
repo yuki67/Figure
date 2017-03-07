@@ -59,7 +59,7 @@ def save_gif(figure, filename, width, height, duration=100, loop=True):
     img = Image.new("RGB", (width + 1, height + 1), "white")
     gif_images = []
 
-    class AnxiousRenderer(JPGRenderer):
+    class AnxiousRenderer(_JPGRenderer):
         """ renderするたびにgif_imagesに画像のコピーを追加するようにしたJPGRenderer """
 
         def render(self, figure):
@@ -78,7 +78,7 @@ def save_fractal_gif(fractal, filename, width, height, duration=100, loop=0xffff
     initiator_class = fractal.initiator.__class__
     gif_images = []
 
-    class AnxiousRenderer(JPGRenderer):
+    class AnxiousRenderer(_JPGRenderer):
         """ fractal.initiatorを書くたびにgif_imagesに画像のコピーを追加するJPGRenderer """
         n = 0
 
