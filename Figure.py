@@ -1,6 +1,4 @@
-from itertools import chain
-from math import pi, sin, cos
-from MyMatrix import Matrix
+""" 次元が関係ない図形 """
 
 
 class Figure(object):
@@ -61,8 +59,8 @@ class Point(list, Figure):
         return Point([sum([self[j] * mat[j][i] for j in range(len(mat[i]))]) for i in range(len(mat))]).regularized()
 
     def regularized(self):
-        """ 最後の要素を1.0にした、斉次座標として等しい点を返す 
-        >>> Point([1.0, 2.0, 3.0, 4.0]).regularized()
+        """
+        最後の要素を1.0にした、斉次座標として等しい点を返す
         """
         return Point([x / self[-1] for x in self])
 
@@ -76,20 +74,6 @@ class Point(list, Figure):
         Point([1.5, 2.0])
         """
         return Point([r * x for x in self[:-1]] + [1.0])
-
-
-class Point2D(Point):
-
-    def __init__(self, lst):
-        assert len(lst) == 2
-        super().__init__(lst + [1.0])
-
-
-class Point3D(Point):
-
-    def __init__(self, lst):
-        assert len(lst) == 3
-        super().__init__(lst + [1.0])
 
 
 class Line(Figure):
@@ -142,51 +126,6 @@ class Polygon(Figure):
     def get_points(self):
         """ Polygonの制御点を返す """
         return self.points
-
-
-class Ellipse(Polygon):
-    """ 楕円 """
-
-    def __init__(self, center, a=None, b=None, n=50):
-        # a, bがNoneの場合に限ってPolygonを第一引数から直接作る
-        if not a and not b:
-            self.n = n
-            super().__init__(center)
-        else:
-            self.center = center
-            self.a = a
-            self.b = b
-            self.n = n
-            points = [Point2D([self.center[0] + self.a * cos(theta * 2 / n * pi),
-                               self.center[1] + self.b * sin(theta * 2 / n * pi)]) for theta in range(self.n)]
-            super().__init__(points)
-
-    def __repr__(self):
-        return "Ellipse(%s, %s, %s)" % (self.center, self.a, self.b)
-
-
-class Circle(Ellipse):
-    """ 円 """
-
-    def __init__(self, center, r):
-        super().__init__(center, r, r)
-
-    def __repr__(self):
-        return "Circle(%s, %s)" % (str(self.center), str(self.a))
-
-    def circle_points(self, n, stand=False):
-        """
-        演習をn分割するの点を返す
-        stand=Trueの場合、n角形が立つように回転させてから返す
-        """
-        if stand:
-            return [Point2D([self.a * cos(2 * pi * i / n) + self.center[0],
-                             self.a * sin(2 * pi * i / n) + self.center[1]
-                             ]) * Matrix.affine2D(self.center, rot=-pi + pi / 2 * 3 / n) for i in range(n)]
-        else:
-            return [Point2D([self.a * cos(2 * pi * i / n) + self.center[0],
-                             self.a * sin(2 * pi * i / n) + self.center[1]
-                             ]) for i in range(n)]
 
 
 class Fractal(Figure):

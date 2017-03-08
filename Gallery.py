@@ -2,8 +2,8 @@
 import os
 from math import pi
 from PIL import Image
-import Figure
-from Figure import Point2D, Line, Fractal, Polygon, Circle, Ellipse
+from Figure import Line, Fractal, Polygon
+from Figure2D import Point2D, Circle, Ellipse
 from JPGRenderer import JPGRenderer2D
 from MyMatrix import Matrix
 
