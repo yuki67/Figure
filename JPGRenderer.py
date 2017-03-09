@@ -47,10 +47,13 @@ class JPGRenderer3D(_JPGRenderer):
 
 
 class JPGRenderer2D(_JPGRenderer):
-    """ 2DのFigureをJPGに描画する """
+    """
+    2DのFigureをJPGに描画する
+    デフォルトの状態では座標変換を全く行わない(imgのサイズに対しての変換も無し)
+    """
 
-    def __init__(self, img):
-        super().__init__(img, Matrix.identity(3))
+    def __init__(self, img, screen_mat=Matrix.identity(3)):
+        super().__init__(img, screen_mat)
 
 
 def save_gif(figure, filename, width, height, duration=100, loop=True):

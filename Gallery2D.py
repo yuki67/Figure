@@ -149,15 +149,11 @@ class OneLineSweeping(Fractal):
 
 
 def demo():
-    width, height = 1024, 1024
-    rad = min(width, height) / 2
-    gl_mat = Matrix.scale2D(width, height)
-
-    center = Point2D([0.5, 0.5]).transformed(gl_mat)
-    circle = Circle(center, rad)
-    ellipse = Ellipse(center, rad, rad / 2)
-    line = Line(Point2D([0.05, 0.5]), Point2D([0.95, 0.5])).transformed(gl_mat)
-    bottom_line = Line(Point2D([0.05, 0.95]), Point2D([0.95, 0.95])).transformed(gl_mat)
+    center = Point2D([0.5, 0.5])
+    circle = Circle(center, 0.5)
+    ellipse = Ellipse(center, 0.5, 0.25)
+    line = Line(Point2D([0.05, 0.5]), Point2D([0.95, 0.5]))
+    bottom_line = Line(Point2D([0.05, 0.95]), Point2D([0.95, 0.95]))
     exhibits = [
         [Diamond, [circle, 32]],
         [Cardioid, [circle, 256]],
@@ -173,9 +169,10 @@ def demo():
         [OneLineSweeping, [bottom_line, 8, False]],
     ]
 
+    width, height = 1024, 1024
     for exhibit, args in exhibits:
-        img = Image.new("RGB", (width + 1, height + 1), "white")
-        painter = JPGRenderer2D(img)
+        img = Image.new("RGB", (width, height), "white")
+        painter = JPGRenderer2D(img, Matrix.scale2D(width - 1, height - 1))
 
         figure = exhibit(*args)
         print("%s begin." % figure.__class__.__name__)
