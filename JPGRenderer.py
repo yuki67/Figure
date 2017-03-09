@@ -39,11 +39,11 @@ class _JPGRenderer(Renderer):
 class JPGRenderer3D(_JPGRenderer):
     """ 3DのFigureをJPGに描画する """
 
-    def __init__(self, img):
+    def __init__(self, img, camera_mat):
         width, height = img.size
         proj = Matrix.projection3D(9.9, 50, -10, -10, 10, 10)
         screen = Matrix.affine3D(center=(0.0, 0.0, 0.0), scale=(width / 2, height / 2, 1.0), trans=(width / 2, height / 2, 0.0))
-        super().__init__(img, proj * screen)
+        super().__init__(img, camera_mat * proj * screen)
 
 
 class JPGRenderer2D(_JPGRenderer):
