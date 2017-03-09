@@ -79,21 +79,21 @@ class Point(list, Figure):
 class Line(Figure):
     """ 線分 """
 
-    def __init__(self, a, b):
+    def __init__(self, a, b, n=None):
         self.a = a
         self.b = b
-        self.max = max([abs(i - j) for i, j in zip(self.a, self.b)])
+        self.n = n if n is not None else max([abs(i - j) for i, j in zip(self.a, self.b)])
         super().__init__()
 
     def __repr__(self):
         return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
 
     def get_iter(self):
-        if self.max == 0:
+        if self.n == 0:
             # 何もしないイテレータ
             return iter(())
         else:
-            return (self.a + (self.b - self.a).scaled(i / self.max) for i in range(int(self.max) + 1))
+            return (self.a + (self.b - self.a).scaled(i / self.n) for i in range(int(self.n) + 1))
 
     def transformed(self, mat):
         return Line(self.a.transformed(mat), self.b.transformed(mat))
