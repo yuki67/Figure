@@ -17,7 +17,7 @@ class Grid(Figure):
         self.n1 = n1
         self.n2 = n2
 
-    def __iter__(self):
+    def get_iter(self):
         points = self.poly.get_points()
 
         def gen():
@@ -26,6 +26,30 @@ class Grid(Figure):
             for p, q in zip(Line(points[1], points[2], self.n2), Line(points[0], points[3], self.n2)):
                 yield Line(p, q)
         return gen()
+
+
+class Box(Figure):
+    """ 直方体 """
+
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
+    def __iter__(self):
+        x, y, z, _ = self.a
+        s, t, u, _ = self.b
+        return iter([Line(self.a, Point3D([x, y, u])),
+                     Line(self.a, Point3D([x, t, z])),
+                     Line(self.a, Point3D([s, y, z])),
+                     Line(self.b, Point3D([s, t, z])),
+                     Line(self.b, Point3D([s, y, u])),
+                     Line(self.b, Point3D([x, t, u])),
+                     Line(Point3D([x, t, z]), Point3D([s, t, z])),
+                     Line(Point3D([s, y, z]), Point3D([s, t, z])),
+                     Line(Point3D([s, y, z]), Point3D([s, y, u])),
+                     Line(Point3D([x, t, z]), Point3D([x, t, u])),
+                     Line(Point3D([x, t, u]), Point3D([x, y, u])),
+                     Line(Point3D([x, y, u]), Point3D([s, y, u]))])
 
 
 def demo():
@@ -38,6 +62,7 @@ def demo():
 
     exhibits = [
         [Grid, (poly, 15, 15)],
+        [Box, (Point3D([-5.0, -5.0, 10.0]), Point3D([5.0, 5.0, 15.0]))]
     ]
 
     for exhibit, args in exhibits:
@@ -50,7 +75,6 @@ def demo():
 
         filename = os.path.join("Gallery", figure.__class__.__name__) + ".jpg"
         img.save(filename)
-        os.startfile(filename)
         print("%s end." % figure.__class__.__name__)
 
 
