@@ -67,11 +67,11 @@ def demo():
 
     for exhibit, args in exhibits:
         img = Image.new("RGB", (width + 1, height + 1), "white")
-        painter = RendererJPG3D(img, Matrix.affine3D(trans=(0.1, 3.0, 0.1)))
+        renderer = RendererJPG3D(img, Matrix.affine3D(trans=(0.1, 3.0, 0.1)))
 
         figure = exhibit(*args)
         print("%s begin." % figure.__class__.__name__)
-        painter.render(figure)
+        renderer.render(figure)
 
         filename = os.path.join("Gallery", figure.__class__.__name__) + ".jpg"
         img.save(filename)

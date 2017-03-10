@@ -172,11 +172,11 @@ def demo():
     width, height = 1024, 1024
     for exhibit, args in exhibits:
         img = Image.new("RGB", (width, height), "white")
-        painter = RendererJPG2D(img, Matrix.scale2D(width - 1, height - 1))
+        renderer = RendererJPG2D(img, Matrix.scale2D(width - 1, height - 1))
 
         figure = exhibit(*args)
         print("%s begin." % figure.__class__.__name__)
-        painter.render(figure)
+        renderer.render(figure)
 
         filename = os.path.join("Gallery", figure.__class__.__name__) + ".jpg"
         img.save(filename)
