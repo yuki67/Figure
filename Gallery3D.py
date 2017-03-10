@@ -3,7 +3,7 @@ import os
 from PIL import Image
 from Figure import Figure, Line, Polygon
 from Figure3D import Point3D
-from JPGRenderer import JPGRenderer3D
+from RendererJPG import RendererJPG3D
 from MyMatrix import Matrix
 
 
@@ -67,7 +67,7 @@ def demo():
 
     for exhibit, args in exhibits:
         img = Image.new("RGB", (width + 1, height + 1), "white")
-        painter = JPGRenderer3D(img, Matrix.affine3D(trans=(0.1, 3.0, 0.1)))
+        painter = RendererJPG3D(img, Matrix.affine3D(trans=(0.1, 3.0, 0.1)))
 
         figure = exhibit(*args)
         print("%s begin." % figure.__class__.__name__)

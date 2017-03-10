@@ -4,7 +4,7 @@ from MyMatrix import Matrix
 from Renderer import Renderer
 
 
-class _JPGRenderer(Renderer):
+class _RendererJPG(Renderer):
     """
     FigureをJPGに描画するクラスの基底
     他のファイルからインポートするべきではない
@@ -28,7 +28,7 @@ class _JPGRenderer(Renderer):
         self.drawer.line([*line.a[:2], *line.b[:2]], fill="black")
 
 
-class JPGRenderer3D(_JPGRenderer):
+class RendererJPG3D(_RendererJPG):
     """ 3DのFigureをJPGに描画する """
 
     def __init__(self, img, camera_mat):
@@ -38,7 +38,7 @@ class JPGRenderer3D(_JPGRenderer):
         super().__init__(img, camera_mat * proj * screen)
 
 
-class JPGRenderer2D(_JPGRenderer):
+class RendererJPG2D(_RendererJPG):
     """
     2DのFigureをJPGに描画する
     デフォルトの状態では座標変換を全く行わない(imgのサイズに対しての変換も無し)
@@ -54,8 +54,8 @@ def save_gif(figure, filename, width, height, duration=100, loop=True):
     img = Image.new("RGB", (width + 1, height + 1), "white")
     gif_images = []
 
-    class AnxiousRenderer(_JPGRenderer):
-        """ renderするたびにgif_imagesに画像のコピーを追加するようにしたJPGRenderer """
+    class AnxiousRenderer(_RendererJPG):
+        """ renderするたびにgif_imagesに画像のコピーを追加するようにしたRendererJPG """
 
         def render(self, figure):
             """ canvasにfigureを描く """
@@ -73,8 +73,8 @@ def save_fractal_gif(fractal, filename, width, height, duration=100, loop=0xffff
     initiator_class = fractal.initiator.__class__
     gif_images = []
 
-    class AnxiousRenderer(_JPGRenderer):
-        """ fractal.initiatorを書くたびにgif_imagesに画像のコピーを追加するJPGRenderer """
+    class AnxiousRenderer(_RendererJPG):
+        """ fractal.initiatorを書くたびにgif_imagesに画像のコピーを追加するRendererJPG """
         n = 0
 
         def render(self, figure):

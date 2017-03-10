@@ -4,7 +4,7 @@ from math import pi
 from PIL import Image
 from Figure import Line, Fractal, Polygon
 from Figure2D import Point2D, Circle, Ellipse
-from JPGRenderer import JPGRenderer2D
+from RendererJPG import RendererJPG2D
 from MyMatrix import Matrix
 
 
@@ -172,7 +172,7 @@ def demo():
     width, height = 1024, 1024
     for exhibit, args in exhibits:
         img = Image.new("RGB", (width, height), "white")
-        painter = JPGRenderer2D(img, Matrix.scale2D(width - 1, height - 1))
+        painter = RendererJPG2D(img, Matrix.scale2D(width - 1, height - 1))
 
         figure = exhibit(*args)
         print("%s begin." % figure.__class__.__name__)
