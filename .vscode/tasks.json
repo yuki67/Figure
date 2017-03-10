@@ -27,7 +27,7 @@
                     "python",
                     "-m",
                     "doctest",
-                    "${file}"
+                    "Test.txt"
                 ]
             },
             {
