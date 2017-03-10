@@ -14,8 +14,10 @@ class _JPGRenderer(Renderer):
         super().__init__(screen_mat)
         self.canvas = img
         self.drawer = ImageDraw.Draw(img)
+        self.render_functions[Point] = self.render_point
+        self.render_functions[Line] = self.render_line
 
-    def put_pixel(self, point):
+    def render_point(self, point):
         """ canvasにpointを描画する """
         if 0 <= point[0] < self.canvas.width and 0 <= point[1] < self.canvas.height:
             self.canvas.putpixel((int(point[0]), int(point[1])),
@@ -24,16 +26,6 @@ class _JPGRenderer(Renderer):
     def render_line(self, line):
         """ canvasにlineを描画する """
         self.drawer.line([*line.a[:2], *line.b[:2]], fill="black")
-
-    def render(self, figure):
-        """ canvasにfigureを描く """
-        if isinstance(figure, Point):
-            self.put_pixel(figure.transformed(self.screen_mat))
-        elif isinstance(figure, Line):
-            self.render_line(figure.transformed(self.screen_mat))
-        else:
-            for sub_figure in figure:
-                self.render(sub_figure)
 
 
 class JPGRenderer3D(_JPGRenderer):
