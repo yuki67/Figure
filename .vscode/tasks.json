@@ -31,6 +31,20 @@
                 ]
             },
             {
+                "taskName": "run cProfile",
+                "isTestCommand": true,
+                "args": [
+                    "python",
+                    "-m",
+                    "cProfile",
+                    "-s",
+                    "cumtime",
+                    "${file}",
+                    ">",
+                    "test_result.txt"
+                ]
+            },
+            {
                 "taskName": "run python in integrated window",
                 "isBuildCommand": true,
                 "args": [
