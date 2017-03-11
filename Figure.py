@@ -29,7 +29,7 @@ class Figure(object):
         図形はまだ変形されない
         便利のためにselfが返されるが、受け取らなくても情報は追加される
         """
-        self.mat = Matrix.identity(self.dimension)
+        self.mat = self.mat * mat
         return self
 
     def transformed(self, mat):
