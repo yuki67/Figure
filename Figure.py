@@ -59,20 +59,14 @@ class Point(list, Figure):
         return Point([sum([self[j] * mat[j][i] for j in range(len(mat[i]))]) for i in range(len(mat))]).regularized()
 
     def regularized(self):
-        """
-        最後の要素を1.0にした、斉次座標として等しい点を返す
-        """
+        """ 最後の要素を1.0にした、斉次座標として等しい点を返す """
         return Point([x / self[-1] for x in self])
 
     def transformed(self, mat):
         return Point(self * mat)
 
     def scaled(self, r):
-        """
-        座標をr倍した点を返す
-        >>> Point([3.0, 4.0]).scaled(0.5)
-        Point([1.5, 2.0])
-        """
+        """ 座標をr倍した点を返す """
         return Point([r * x for x in self[:-1]] + [1.0])
 
 
@@ -99,11 +93,7 @@ class Line(Figure):
         return Line(self.a.transformed(mat), self.b.transformed(mat))
 
     def mid(self):
-        """ 線分の中点を返す
-
-        >>> Line(Point([0.0, 3.0]), Point([6.0, 0.0])).mid()
-        Point([3.0, 1.5])
-        """
+        """ 線分の中点を返す """
         return (self.a + self.b).scaled(0.5)
 
 
@@ -163,8 +153,3 @@ class Fractal(Figure):
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
-    doctest.testfile("FigureTest.txt")
