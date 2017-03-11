@@ -9,11 +9,11 @@ class Figure(object):
     """
 
     def __init__(self, dimension):
-        self.mat = None
+        self.mat = Matrix.identity(3)
         self.dimension = dimension
 
     def __iter__(self):
-        return self.get_iter()
+        return (p.transform(self.mat) for p in self.get_iter())
 
     def __list__(self):
         """ selfを構成する部分図形が詰まったリストを返す """
@@ -24,13 +24,20 @@ class Figure(object):
         pass
 
     def transform(self, mat):
-        """ selfをmatで変形する """
-        if self.mat is None:
-            self.mat = Matrix.identity(self.dimension)
-        self.mat = self.mat * mat
+        """
+        図形をmatで変形するという情報を追加する
+        図形はまだ変形されない
+        便利のためにselfが返されるが、受け取らなくても情報は追加される
+        """
+        self.mat = Matrix.identity(self.dimension)
+        return self
 
     def transformed(self, mat):
-        """ selfを行列matで変形したものを返す """
+        """
+        selfを行列matで変形したものを返す
+        Rendererで使われることを想定しているので、
+        通常の変形ではtransformed()ではなくtransform()を使うべき
+        """
         pass
 
 
@@ -146,11 +153,6 @@ class Fractal(Figure):
             return (self.initiator.transformed(gen) for gen in self.generator)
         else:
             return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
-
-    def transformed(self, mat):
-        copied = Fractal(self.initiator, self.generator, self.n, self.each, self.generator)
-        copied.transform(mat)
-        return copied
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)

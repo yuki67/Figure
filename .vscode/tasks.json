@@ -27,7 +27,7 @@
                     "python",
                     "-m",
                     "doctest",
-                    "Test.txt"
+                    "FigureTest.txt"
                 ]
             },
             {
