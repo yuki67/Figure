@@ -2,6 +2,14 @@ from math import sin, cos
 
 
 class Matrix(list):
+    # よく使われそうな恒等行列を定値として持っておく
+    iden_three = [[1.0, 0.0, 0.0],
+                  [0.0, 1.0, 0.0],
+                  [0.0, 0.0, 1.0]]
+    iden_four = [[1.0, 0.0, 0.0, 0.0],
+                 [0.0, 1.0, 0.0, 0.0],
+                 [0.0, 0.0, 1.0, 0.0],
+                 [0.0, 0.0, 0.0, 1.0]]
 
     def __repr__(self):
         return "Matrix(%s)" % list.__str__(list(self))
@@ -23,10 +31,17 @@ class Matrix(list):
 
     @staticmethod
     def identity(n):
-        ans = [[0 for j in range(n)] for i in range(n)]
-        for i in range(n):
-            ans[i][i] = 1
-        return Matrix(ans)
+        # 定値として持っていればそれを返す
+        if n == 3:
+            return Matrix(Matrix.iden_three)
+        elif n == 4:
+            return Matrix(Matrix.iden_four)
+        else:
+            # 定値として持っていなければ作る
+            ans = [[0 for j in range(n)] for i in range(n)]
+            for i in range(n):
+                ans[i][i] = 1
+            return Matrix(ans)
 
     @staticmethod
     def rot2D(rot):
