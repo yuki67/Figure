@@ -1,4 +1,5 @@
 """ 次元が関係ない図形 """
+from MyMatrix import Matrix
 
 
 class Figure(object):
@@ -6,6 +7,10 @@ class Figure(object):
     任意の図形を表すクラス
     核となるのはget_iter()関数である
     """
+
+    def __init__(self, dimension):
+        self.mat = None
+        self.dimension = dimension
 
     def __iter__(self):
         return self.get_iter()
@@ -17,6 +22,12 @@ class Figure(object):
     def get_iter(self):
         """ selfを構成する部分図形が詰まったイテレータを"新しく作って"返す """
         pass
+
+    def transform(self, mat):
+        """ selfをmatで変形する """
+        if self.mat is None:
+            self.mat = Matrix.identity(self.dimension)
+        self.mat = self.mat * mat
 
     def transformed(self, mat):
         """ selfを行列matで変形してものを返す """
@@ -43,7 +54,7 @@ class Point(list, Figure):
 
     def __init__(self, lst):
         super().__init__(lst)
-        Figure.__init__(self)
+        Figure.__init__(self, len(lst))
 
     def __repr__(self):
         return "Point(%s)" % str(list(self))
@@ -74,10 +85,10 @@ class Line(Figure):
     """ 線分 """
 
     def __init__(self, a, b, n=None):
+        super().__init__(len(a))
         self.a = a
         self.b = b
         self.n = n if n is not None else max([abs(i - j) for i, j in zip(self.a, self.b)])
-        super().__init__()
 
     def __repr__(self):
         return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
@@ -101,8 +112,8 @@ class Polygon(Figure):
     """ 多角形 """
 
     def __init__(self, points):
+        super().__init__(len(points[0]))
         self.points = points
-        super().__init__()
 
     def __repr__(self):
         return "Polygon(%s)" % str(self.points)
@@ -121,35 +132,29 @@ class Polygon(Figure):
 class Fractal(Figure):
     """ フラクタル """
 
-    def __init__(self, initiator, generator, n, each=False, init_generator=None, last_transform=None):
+    def __init__(self, initiator, generator, n, each=False, init_generator=None):
         # init_generatorはget_iter()からの再帰呼び出しでのみ使われる
-        # last_transformはFractal.transformed()でのみ指定される
+        super().__init__(len(generator[0]))
         self.initiator = initiator
         self.generator = generator
         self.n = n
         self.each = each
         self.init_generator = init_generator if init_generator else generator
-        self.last_transform = last_transform
-        super().__init__()
 
     def get_iter(self):
         if self.each:
-            return (Fractal(self.initiator, self.init_generator, n, False, self.init_generator, self.last_transform) for n in range(self.n + 1))
+            return (Fractal(self.initiator, self.init_generator, n, False, self.init_generator) for n in range(self.n + 1))
         if self.n == 0:
-            if self.last_transform:
-                return iter((self.initiator.transformed(self.last_transform),))
-            else:
-                return iter((self.initiator,))
+            return iter((self.initiator,))
         if self.n == 1:
-            if self.last_transform:
-                return (self.initiator.transformed(gen * self.last_transform) for gen in self.generator)
-            else:
-                return (self.initiator.transformed(gen) for gen in self.generator)
+            return (self.initiator.transformed(gen) for gen in self.generator)
         else:
-            return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator, self.last_transform) for mat in self.generator)
+            return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
 
     def transformed(self, mat):
-        return Fractal(self.initiator, self.generator, self.n, self.each, self.generator, mat)
+        copied = Fractal(self.initiator, self.generator, self.n, self.each, self.generator)
+        copied.transform(mat)
+        return copied
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)

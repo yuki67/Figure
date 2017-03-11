@@ -2,16 +2,17 @@
 import os
 from math import pi
 from PIL import Image
-from Figure import Line, Fractal, Polygon
+from Figure import Figure, Line, Fractal, Polygon
 from Figure2D import Point2D, Circle, Ellipse
 from RendererJPG import RendererJPG2D
 from MyMatrix import Matrix
 
 
-class Circloid(object):
+class Circloid(Figure):
     """ サークロイド(造語) """
 
     def __init__(self, circle, n, f):
+        super().__init__(3)
         self.circle = circle
         self.n = n
         self.f = f

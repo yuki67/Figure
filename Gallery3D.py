@@ -11,6 +11,7 @@ class Grid(Figure):
     """ 四角形内部のグリッド """
 
     def __init__(self, poly, n1, n2):
+        super().__init__(4)
         assert len(poly.get_points()) == 4
         self.poly = poly
         # グリッドの分割数
@@ -32,6 +33,7 @@ class Box(Figure):
     """ 直方体 """
 
     def __init__(self, a, b):
+        super().__init__(4)
         self.a = a
         self.b = b
 
