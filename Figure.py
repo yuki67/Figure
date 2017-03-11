@@ -30,7 +30,7 @@ class Figure(object):
         self.mat = self.mat * mat
 
     def transformed(self, mat):
-        """ selfを行列matで変形してものを返す """
+        """ selfを行列matで変形したものを返す """
         pass
 
 
@@ -123,10 +123,6 @@ class Polygon(Figure):
 
     def transformed(self, mat):
         return self.__class__([p.transformed(mat) for p in self.points])
-
-    def get_points(self):
-        """ Polygonの制御点を返す """
-        return self.points
 
 
 class Fractal(Figure):

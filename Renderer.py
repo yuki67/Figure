@@ -14,7 +14,6 @@ class Renderer(object):
         if figure.mat is not None:
             self.transform_mat = figure.mat
         if self.render_functions.get(type(figure)):
-            print(figure.mat)
             self.render_functions[type(figure)](figure.transformed(self.transform_mat * self.screen_mat))
         else:
             for sub_figure in figure:

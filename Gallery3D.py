@@ -12,14 +12,14 @@ class Grid(Figure):
 
     def __init__(self, poly, n1, n2):
         super().__init__(4)
-        assert len(poly.get_points()) == 4
+        assert len(poly.points) == 4
         self.poly = poly
         # グリッドの分割数
         self.n1 = n1
         self.n2 = n2
 
     def get_iter(self):
-        points = self.poly.get_points()
+        points = self.poly.points
 
         def gen():
             for p, q in zip(Line(points[0], points[1], self.n1), Line(points[3], points[2], self.n1)):
