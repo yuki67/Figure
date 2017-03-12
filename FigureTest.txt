@@ -1,28 +1,34 @@
->>> from Figure import Point
+>>> from math import pi
 >>> from Figure import *
+>>> from Figure2D import *
+>>> from Figure3D import *
 >>> from MyMatrix import Matrix
 
 ### Point
->>> a = Point([1, 2, 3])
->>> b = Point([2, 3, 4])
->>> a + b
-Point([3, 5, 1.0])
->>> a - b
-Point([-1, -1, 1.0])
->>> b.regularized()
-Point([0.5, 0.75, 1.0])
->>> a.scaled(3)
-Point([3, 6, 1.0])
->>> mat = Matrix.affine2D(rot = 3.1415/6, trans=(1.0, 2.0), scale=(3.0, 2.0), center=(1.0, 1.0))
->>> a.transformed(mat)
-Point([0.767920376919306, 1.7559957480620476, 1.0])
->>> b.transformed(mat)
-Point([1.0759402826894795, 2.066996811046536, 1.0])
->>> a.transform(mat)
-Point([1, 2, 3])
+>>> a = Point3D([1, 2, 3])
+>>> b = Point3D([2, 3, 4])
 >>> a
-Point([1, 2, 3])
->>> b.transform(mat)
-Point([2, 3, 4])
+Point([1, 2, 3, 1.0])
 >>> b
-Point([2, 3, 4])
+Point([2, 3, 4, 1.0])
+>>> a + b
+Point([3, 5, 7, 1.0])
+>>> a - b
+Point([-1, -1, -1, 1.0])
+>>> b.regularized()
+Point([2.0, 3.0, 4.0, 1.0])
+>>> a.scaled(3)
+Point([3, 6, 9, 1.0])
+>>> mat = Matrix.affine3D(rot = (pi/6, pi/3, pi/4), trans=(1.0, 2.0, 1.0), scale=(3.0, 2.0, -1.0), center=(1.0, 1.0, 1.0))
+>>> a.transformed(mat)
+Point([3.6950157888512534, 7.1479063416285324, 1.383974596215561, 1.0])
+>>> b.transformed(mat)
+Point([6.98102183537224, 8.820938949104148, 0.33493649053890273, 1.0])
+>>> a.transform(mat)
+Point([1, 2, 3, 1.0])
+>>> a
+Point([1, 2, 3, 1.0])
+>>> b.transform(mat)
+Point([2, 3, 4, 1.0])
+>>> b
+Point([2, 3, 4, 1.0])
