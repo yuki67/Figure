@@ -95,7 +95,7 @@ class Line(Figure):
         super().__init__(len(a))
         self.a = a
         self.b = b
-        self.n = n if n is not None else max([abs(i - j) for i, j in zip(self.a, self.b)])
+        self.n = n - 1 if n is not None else max([abs(i - j) for i, j in zip(self.a, self.b)])
 
     def __repr__(self):
         return "Line(%s, %s)" % (self.a.__repr__(), self.b.__repr__())
