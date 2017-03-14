@@ -156,3 +156,10 @@ class Fractal(Figure):
 
     def __repr__(self):
         return "Fractal(%s, %s, %d)" % (str(self.initiator), str(self.generator), self.n)
+
+
+class Repeats(Fractal):
+    """ figureにmatを繰り返し適用した図形 """
+
+    def __init__(self, figure, mat, n):
+        super().__init__(figure, [mat], n, True)
