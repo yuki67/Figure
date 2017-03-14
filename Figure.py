@@ -29,7 +29,7 @@ class Figure(object):
     def transform(self, mat):
         """
         図形をmatで変形するという情報を追加する
-        図形はまだ変形されない
+        ただし図形はまだ変形されない (figure.transform(mat) === figure)
         便利のためにselfが返されるが、受け取らなくても情報は追加される
         """
         self.mat = self.mat * mat
@@ -38,10 +38,11 @@ class Figure(object):
     def transformed(self, mat):
         """
         selfを行列matで変形したものを返す
-        Rendererで使われることを想定しているので、
-        通常の変形ではtransformed()ではなくtransform()を使うべき
+        本当に図形を変化させる (figure.transformed(mat) != figure)
+        Rendererで描画関数に渡される直前にのみ実行されるべき関数である。
+        それ以外のときははtransformed()ではなくcopy().transform()を使うこと
         """
-        return self.copy().transform(mat)
+        assert False, "%s.transformed() not defined" % self.__class__.__name__
 
 
 class UnionFigure(Figure):
