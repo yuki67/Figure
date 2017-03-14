@@ -9,8 +9,7 @@ class Figure(object):
     """
 
     def __init__(self, dimension):
-        self.mat = Matrix.identity(3)
-        self.dimension = dimension
+        self.mat = Matrix.identity(dimension)
 
     def __iter__(self):
         return (p.transform(self.mat) for p in self.get_iter())
