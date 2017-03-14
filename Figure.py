@@ -18,6 +18,10 @@ class Figure(object):
         """ selfを構成する部分図形が詰まったリストを返す """
         return list(self.get_iter())
 
+    def copy(self):
+        """ 自分のコピーを返す """
+        assert False, "%s.copy() not defined" % self.__class__.__name__
+
     def get_iter(self):
         """ selfを構成する部分図形が詰まったイテレータを"新しく作って"返す """
         assert False, "%s.get_iter() not defined" % self.__class__.__name__
@@ -37,7 +41,7 @@ class Figure(object):
         Rendererで使われることを想定しているので、
         通常の変形ではtransformed()ではなくtransform()を使うべき
         """
-        assert False, "%s.transformed() not defined" % self.__class__.__name__
+        return self.copy().transform(mat)
 
 
 class UnionFigure(Figure):
@@ -79,6 +83,9 @@ class Point(list, Figure):
         """ 最後の要素を1.0にした、斉次座標として等しい点を返す """
         return Point([x / self[-1] for x in self])
 
+    def copy(self):
+        return Point(self)
+
     def transformed(self, mat):
         return Point(self * mat)
 
@@ -106,6 +113,9 @@ class Line(Figure):
         else:
             return (self.a + (self.b - self.a).scaled(i / self.n) for i in range(int(self.n) + 1))
 
+    def copy(self):
+        return Line(self.a, self.b)
+
     def transformed(self, mat):
         return Line(self.a.transformed(mat), self.b.transformed(mat))
 
@@ -127,8 +137,8 @@ class Polygon(Figure):
     def get_iter(self):
         return (Line(self.points[i - 1], self.points[i]) for i in range(len(self.points)))
 
-    def transformed(self, mat):
-        return self.__class__([p.transformed(mat) for p in self.points])
+    def copy(self):
+        return Polygon(self.points)
 
 
 class Fractal(Figure):
@@ -143,13 +153,16 @@ class Fractal(Figure):
         self.each = each
         self.init_generator = init_generator if init_generator else generator
 
+    def copy(self):
+        return Fractal(self.initiator, self.generator, self.n, self.each, self.init_generator)
+
     def get_iter(self):
         if self.each:
             return (Fractal(self.initiator, self.init_generator, n, False, self.init_generator) for n in range(self.n + 1))
         if self.n == 0:
-            return iter((self.initiator,))
+            return iter((self.initiator.copy(),))
         if self.n == 1:
-            return (self.initiator.transformed(gen) for gen in self.generator)
+            return (self.initiator.copy().transform(self.initiator.mat * gen) for gen in self.generator)
         else:
             return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
 

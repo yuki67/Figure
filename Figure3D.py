@@ -43,6 +43,9 @@ class Box(Figure):
         self.a = a
         self.b = b
 
+    def copy(self):
+        return Box(self.a, self.b)
+
     def center(self):
         """ 中点 """
         return (self.a + self.b).scaled(0.5).transformed(self.mat)
@@ -64,9 +67,6 @@ class Box(Figure):
                      Line(Point3D([x, t, z]), Point3D([x, t, u])),
                      Line(Point3D([x, t, u]), Point3D([x, y, u])),
                      Line(Point3D([x, y, u]), Point3D([s, y, u]))])
-
-    def transformed(self, mat):
-        return Box(self.a, self.b).transform(self.mat * mat)
 
     def __repr__(self):
         return "Box(%s, %s)" % (str(self.a), str(self.b))
