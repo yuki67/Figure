@@ -1,7 +1,3 @@
-from Figure import Point
-from MyMatrix import Matrix
-
-
 class Renderer(object):
 
     def __init__(self, screen_mat):
