@@ -31,6 +31,9 @@ class Grid(Figure):
                 yield Line(p, q)
         return gen()
 
+    def __repr__(self):
+        return "Grid(%s, %s, %s)" % (str(self.poly), str(self.n1), str(self.n2))
+
 
 class Box(Figure):
     """ 直方体 """
@@ -55,3 +58,6 @@ class Box(Figure):
                      Line(Point3D([x, t, z]), Point3D([x, t, u])),
                      Line(Point3D([x, t, u]), Point3D([x, y, u])),
                      Line(Point3D([x, y, u]), Point3D([s, y, u]))])
+
+    def __repr__(self):
+        return "Box(%s, %s)" % (str(self.a), str(self.b))
