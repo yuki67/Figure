@@ -161,4 +161,5 @@ class Repeats(Fractal):
     """ figureにmatを繰り返し適用した図形 """
 
     def __init__(self, figure, mat, n):
-        super().__init__(figure, [mat], n, True)
+        assert n != 0
+        super().__init__(figure, [mat], n - 1, True)
