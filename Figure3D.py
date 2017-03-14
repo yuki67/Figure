@@ -43,21 +43,30 @@ class Box(Figure):
         self.a = a
         self.b = b
 
+    def center(self):
+        """ 中点 """
+        return (self.a + self.b).scaled(0.5).transformed(self.mat)
+
     def __iter__(self):
-        x, y, z, _ = self.a
-        s, t, u, _ = self.b
-        return iter([Line(self.a, Point3D([x, y, u])),
-                     Line(self.a, Point3D([x, t, z])),
-                     Line(self.a, Point3D([s, y, z])),
-                     Line(self.b, Point3D([s, t, z])),
-                     Line(self.b, Point3D([s, y, u])),
-                     Line(self.b, Point3D([x, t, u])),
+        _a = self.a.transformed(self.mat)
+        _b = self.b.transformed(self.mat)
+        x, y, z, _ = _a
+        s, t, u, _ = _b
+        return iter([Line(_a, Point3D([x, y, u])),
+                     Line(_a, Point3D([x, t, z])),
+                     Line(_a, Point3D([s, y, z])),
+                     Line(_b, Point3D([s, t, z])),
+                     Line(_b, Point3D([s, y, u])),
+                     Line(_b, Point3D([x, t, u])),
                      Line(Point3D([x, t, z]), Point3D([s, t, z])),
                      Line(Point3D([s, y, z]), Point3D([s, t, z])),
                      Line(Point3D([s, y, z]), Point3D([s, y, u])),
                      Line(Point3D([x, t, z]), Point3D([x, t, u])),
                      Line(Point3D([x, t, u]), Point3D([x, y, u])),
                      Line(Point3D([x, y, u]), Point3D([s, y, u]))])
+
+    def transformed(self, mat):
+        return Box(self.a, self.b).transform(self.mat * mat)
 
     def __repr__(self):
         return "Box(%s, %s)" % (str(self.a), str(self.b))
