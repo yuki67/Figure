@@ -20,7 +20,7 @@ class Figure(object):
 
     def get_iter(self):
         """ selfを構成する部分図形が詰まったイテレータを"新しく作って"返す """
-        pass
+        assert False, "%s.get_iter() not defined" % self.__class__.__name__
 
     def transform(self, mat):
         """
@@ -37,7 +37,7 @@ class Figure(object):
         Rendererで使われることを想定しているので、
         通常の変形ではtransformed()ではなくtransform()を使うべき
         """
-        pass
+        assert False, "%s.transformed() not defined" % self.__class__.__name__
 
 
 class UnionFigure(Figure):
