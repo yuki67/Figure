@@ -2,7 +2,7 @@
 import os
 from math import pi
 from PIL import Image
-from Figure import Figure, Line, Fractal, Polygon
+from Figure import Figure, Line, Polygon, Fractal, Repeats
 from Figure2D import Point2D, Circle, Ellipse
 from RendererJPG import RendererJPG2D
 from MyMatrix import Matrix
@@ -126,13 +126,11 @@ class SierpinskiGasket(Fractal):
         super().__init__(Polygon(points), generator, n)
 
 
-class Donuts(Fractal):
+class Donuts(Repeats):
     """ ドーナツ """
 
     def __init__(self, ellipse, n=50):
-        mat = Matrix.affine2D(center=ellipse.center, rot=pi / n * 2)
-        generator = [mat]
-        super().__init__(ellipse, generator, n, each=True)
+        super().__init__(ellipse, Matrix.affine2D(center=ellipse.center, rot=pi / n * 2), n)
 
 
 class OneLineSweeping(Fractal):
