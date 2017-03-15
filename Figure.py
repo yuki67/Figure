@@ -85,7 +85,7 @@ class Point(list, Figure):
         return Point([x / self[-1] for x in self])
 
     def copy(self):
-        return Point(self)
+        return Point(self).transform(self.mat)
 
     def transformed(self, mat):
         return Point(self * mat)
@@ -115,7 +115,7 @@ class Line(Figure):
             return (self.a + (self.b - self.a).scaled(i / self.n) for i in range(int(self.n) + 1))
 
     def copy(self):
-        return Line(self.a, self.b)
+        return Line(self.a, self.b).transform(self.mat)
 
     def transformed(self, mat):
         return Line(self.a.transformed(mat), self.b.transformed(mat))
@@ -139,7 +139,7 @@ class Polygon(Figure):
         return (Line(self.points[i - 1], self.points[i]) for i in range(len(self.points)))
 
     def copy(self):
-        return Polygon(self.points)
+        return Polygon(self.points).transform(self.mat)
 
 
 class Fractal(Figure):
@@ -155,15 +155,15 @@ class Fractal(Figure):
         self.init_generator = init_generator if init_generator else generator
 
     def copy(self):
-        return Fractal(self.initiator, self.generator, self.n, self.each, self.init_generator)
+        return Fractal(self.initiator, self.generator, self.n, self.each, self.init_generator).transform(self.mat)
 
     def get_iter(self):
         if self.each:
             return (Fractal(self.initiator, self.init_generator, n, False, self.init_generator) for n in range(self.n + 1))
         if self.n == 0:
-            return iter((self.initiator.copy().transform(self.initiator.mat),))
+            return iter((self.initiator.copy(),))
         if self.n == 1:
-            return (self.initiator.copy().transform(self.initiator.mat * gen) for gen in self.generator)
+            return (self.initiator.copy().transform(gen) for gen in self.generator)
         else:
             return (Fractal(self.initiator, [gen * mat for gen in self.init_generator], self.n - 1, self.each, self.init_generator) for mat in self.generator)
 

@@ -44,15 +44,15 @@ class Box(Figure):
         self.b = b
 
     def copy(self):
-        return Box(self.a, self.b)
+        return Box(self.a, self.b).transform(self.mat)
 
     def center(self):
         """ 中点 """
         return (self.a + self.b).scaled(0.5).transformed(self.mat)
 
-    def __iter__(self):
-        _a = self.a.transformed(self.mat)
-        _b = self.b.transformed(self.mat)
+    def get_iter(self):
+        _a = self.a.transformed(self.a.mat)
+        _b = self.b.transformed(self.b.mat)
         x, y, z, _ = _a
         s, t, u, _ = _b
         return iter([Line(_a, Point3D([x, y, u])),
