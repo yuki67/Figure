@@ -143,6 +143,9 @@ class Polygon(Figure):
     def copy(self):
         return Polygon(self.points).transform(self.mat)
 
+    def transformed(self, mat):
+        return Polygon([p.transformed(mat) for p in self.points])
+
 
 class Fractal(Figure):
     """ フラクタル """
