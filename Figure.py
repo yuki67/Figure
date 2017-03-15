@@ -161,7 +161,7 @@ class Fractal(Figure):
         if self.each:
             return (Fractal(self.initiator, self.init_generator, n, False, self.init_generator) for n in range(self.n + 1))
         if self.n == 0:
-            return iter((self.initiator.copy(),))
+            return iter((self.initiator.copy().transform(self.initiator.mat),))
         if self.n == 1:
             return (self.initiator.copy().transform(self.initiator.mat * gen) for gen in self.generator)
         else:
