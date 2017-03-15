@@ -78,11 +78,13 @@ class Point(list, Figure):
 
     def __mul__(self, mat):
         """ 行列との積 """
-        return Point([sum([self[j] * mat[j][i] for j in range(len(mat[i]))]) for i in range(len(mat))]).regularized()
+        return Point([sum([self[j] * mat[j][i] for j in range(len(mat[i]))]) for i in range(len(mat))]).regularize()
 
-    def regularized(self):
-        """ 最後の要素を1.0にした、斉次座標として等しい点を返す """
-        return Point([x / self[-1] for x in self])
+    def regularize(self):
+        """ selfを最後の要素を1.0にした斉次座標として等しい点にしてそれを返す """
+        for i in range(len(self)):
+            self[i] /= self[-1]
+        return self
 
     def copy(self):
         return Point(self).transform(self.mat)
