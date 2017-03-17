@@ -39,8 +39,8 @@ class Ellipse(Polygon):
 class Circle(Ellipse):
     """ 円 """
 
-    def __init__(self, center, r):
-        super().__init__(center, r, r)
+    def __init__(self, center, r, n=50):
+        super().__init__(center, r, r, n)
 
     def __repr__(self):
         return "Circle(%s, %s)" % (str(self.center), str(self.a))
