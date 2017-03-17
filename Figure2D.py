@@ -1,6 +1,6 @@
 """ 2次元の図形 """
 from math import sin, cos, pi
-from Figure import Point, Polygon
+from Figure import Figure, Line, Point, Polygon
 from MyMatrix import Matrix
 
 
@@ -9,26 +9,33 @@ def point_2d(x, y):
     return Point([x, y, 1.0])
 
 
-
-class Ellipse(Polygon):
+class Ellipse(Figure):
     """ 楕円 """
 
-    def __init__(self, center, a=None, b=None, n=50):
-        # a, bがNoneの場合に限ってPolygonを第一引数から直接作る
-        if not a and not b:
-            self.n = n
-            super().__init__(center)
-        else:
-            self.center = center
-            self.a = a
-            self.b = b
-            self.n = n
-            points = [Point2D([self.center[0] + self.a * cos(theta * 2 / n * pi),
-                               self.center[1] + self.b * sin(theta * 2 / n * pi)]) for theta in range(self.n)]
-            super().__init__(points)
+    def __init__(self, center, a, b, n=50):
+        super().__init__(3)
+        self.center = center
+        self.a = a
+        self.b = b
+        self.n = n
 
     def copy(self):
         return Ellipse(self.center, self.a, self.b, self.n).transform(self.mat)
+
+    def get_iter(self):
+        def ans():
+            p = point_2d(self.center[0] + self.a * cos(-2 / self.n * pi),
+                         self.center[1] + self.b * sin(-2 / self.n * pi))
+            for i in range(self.n):
+                q = point_2d(self.center[0] + self.a * cos(i * 2 / self.n * pi),
+                             self.center[1] + self.b * sin(i * 2 / self.n * pi))
+                yield Line(p, q)
+                p = q
+        return ans()
+
+    def transformed(self, mat):
+        return Polygon([point_2d(self.center[0] + self.a * cos(i * 2 / self.n * pi),
+                                 self.center[1] + self.b * sin(i * 2 / self.n * pi)).transform(mat) for i in range(self.n)])
 
     def __repr__(self):
         return "Ellipse(%s, %s, %s)" % (self.center, self.a, self.b)
