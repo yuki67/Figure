@@ -2,7 +2,7 @@
 import os
 from PIL import Image
 from Figure import Polygon, Repeats
-from Figure3D import Point3D, Grid, Box
+from Figure3D import point_3d, Grid, Box
 from RendererJPG import RendererJPG3D
 from MyMatrix import Matrix
 
@@ -34,12 +34,12 @@ class BoxBoxed(Repeats):
 
 def demo():
     width, height = 1024, 1024
-    a = Point3D([-10.0, -10.0, 10.0])
-    b = Point3D([10.0, 10.0, 15.0])
-    poly = Polygon([Point3D([-5.0, 0.0, 6.0]),
-                    Point3D([5.0, 0.0, 6.0]),
-                    Point3D([5.0, 0.0, 15.0]),
-                    Point3D([-5.0, 0.0, 15.0]), ])
+    a = point_3d(-10.0, -10.0, 10.0)
+    b = point_3d(10.0, 10.0, 15.0)
+    poly = Polygon([point_3d(-5.0, 0.0, 6.0),
+                    point_3d(5.0, 0.0, 6.0),
+                    point_3d(5.0, 0.0, 15.0),
+                    point_3d(-5.0, 0.0, 15.0), ])
 
     exhibits = [
         [Grid, (poly, 15, 15)],

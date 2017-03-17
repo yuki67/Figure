@@ -3,7 +3,7 @@ import os
 from math import pi
 from PIL import Image
 from Figure import Figure, Line, Polygon, Fractal, Repeats
-from Figure2D import Point2D, Circle, Ellipse
+from Figure2D import point_2d, Circle, Ellipse
 from RendererJPG import RendererJPG2D
 from MyMatrix import Matrix
 
@@ -92,10 +92,10 @@ class KochCurve(Fractal):
     def __init__(self, line, n, each=False):
         r = 1 / 3
         args = [
-            [line.a, 0.0, [r, r], Point2D([0.0, 0.0])],
+            [line.a, 0.0, [r, r], point_2d(0.0, 0.0)],
             [line.a, -pi / 3, [r, r], (line.b - line.a).scaled(r)],
             [line.b, pi / 3, [r, r], (line.a - line.b).scaled(r)],
-            [line.b, 0.0, [r, r], Point2D([0.0, 0.0])],
+            [line.b, 0.0, [r, r], point_2d(0.0, 0.0)],
         ]
         generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
         super().__init__(line, generator, n, each)
@@ -107,7 +107,7 @@ class DragonCurve(Fractal):
     def __init__(self, line, n, each=True):
         r = 2 ** -0.5
         args = [
-            [line.a, -pi / 4, [r, r], Point2D([0.0, 0.0])],
+            [line.a, -pi / 4, [r, r], point_2d(0.0, 0.0)],
             [line.a, -pi / 4 * 3, [r, r], line.b - line.a],
         ]
         generator = [Matrix.affine2D(c, r, s, t) for c, r, s, t in args]
@@ -118,7 +118,7 @@ class SierpinskiGasket(Fractal):
     """ シェルピンスキーのギャスケット """
 
     def __init__(self, points, n):
-        center = sum(points, Point2D([0.0, 0.0])).scaled(1 / len(points))
+        center = sum(points, point_2d(0.0, 0.0)).scaled(1 / len(points))
         args = [
             [center, 0.0, [0.5, 0.5], (p - center).scaled(0.5)] for p in points
         ]
@@ -139,20 +139,20 @@ class OneLineSweeping(Fractal):
     def __init__(self, line, n, each=True):
         p = (line.b - line.a).scaled(0.5)
         args = [
-            [line.a, -pi / 4, [2**-0.5, 2**-0.5], Point2D([0.0, 0.0]), [False, True]],
-            [line.a, 0, [0.5, 0.5], Point2D([p[1], -p[0]]) + p, [False, False]],
-            [line.b, pi / 2, [0.5, 0.5], Point2D([p[1], -p[0]]), [True, True]],
+            [line.a, -pi / 4, [2**-0.5, 2**-0.5], point_2d(0.0, 0.0), [False, True]],
+            [line.a, 0, [0.5, 0.5], point_2d(p[1], -p[0]) + p, [False, False]],
+            [line.b, pi / 2, [0.5, 0.5], point_2d(p[1], -p[0]), [True, True]],
         ]
         generator = [Matrix.affine2D(c, r, s, t, m) for c, r, s, t, m in args]
         super().__init__(line, generator, n, each)
 
 
 def demo():
-    center = Point2D([0.5, 0.5])
+    center = point_2d(0.5, 0.5)
     circle = Circle(center, 0.5)
     ellipse = Ellipse(center, 0.5, 0.25)
-    line = Line(Point2D([0.05, 0.5]), Point2D([0.95, 0.5]))
-    bottom_line = Line(Point2D([0.05, 0.95]), Point2D([0.95, 0.95]))
+    line = Line(point_2d(0.05, 0.5), point_2d(0.95, 0.5))
+    bottom_line = Line(point_2d(0.05, 0.95), point_2d(0.95, 0.95))
     exhibits = [
         [Diamond, [circle, 32]],
         [Cardioid, [circle, 256]],

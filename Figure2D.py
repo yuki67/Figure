@@ -4,12 +4,10 @@ from Figure import Point, Polygon
 from MyMatrix import Matrix
 
 
-class Point2D(Point):
-    """ 二次元の点 """
+def point_2d(x, y):
+    """ 二次元の点を作る関数 """
+    return Point([x, y, 1.0])
 
-    def __init__(self, lst):
-        assert len(lst) == 2
-        super().__init__(lst + [1.0])
 
 
 class Ellipse(Polygon):
@@ -54,10 +52,9 @@ class Circle(Ellipse):
         stand=Trueの場合、n角形が立つように回転させてから返す
         """
         if stand:
-            return [Point2D([self.a * cos(2 * pi * i / n) + self.center[0],
+            return [point_2d(self.a * cos(2 * pi * i / n) + self.center[0],
                              self.a * sin(2 * pi * i / n) + self.center[1]
-                             ]) * Matrix.affine2D(self.center, rot=-pi + pi / 2 * 3 / n) for i in range(n)]
+                             ) * Matrix.affine2D(self.center, rot=-pi + pi / 2 * 3 / n) for i in range(n)]
         else:
-            return [Point2D([self.a * cos(2 * pi * i / n) + self.center[0],
-                             self.a * sin(2 * pi * i / n) + self.center[1]
-                             ]) for i in range(n)]
+            return [point_2d(self.a * cos(2 * pi * i / n) + self.center[0],
+                             self.a * sin(2 * pi * i / n) + self.center[1]) for i in range(n)]

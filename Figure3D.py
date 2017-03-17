@@ -2,12 +2,9 @@
 from Figure import Figure, Point, Line
 
 
-class Point3D(Point):
-    """ 3次元の点 """
-
-    def __init__(self, lst):
-        assert len(lst) == 3
-        super().__init__(lst + [1.0])
+def point_3d(x, y, z):
+    """ 3次元の点を作る """
+    return Point([x, y, z, 1.0])
 
 
 class Grid(Figure):
@@ -55,18 +52,18 @@ class Box(Figure):
         _b = self.b.transformed(self.b.mat)
         x, y, z, _ = _a
         s, t, u, _ = _b
-        return iter([Line(_a, Point3D([x, y, u])),
-                     Line(_a, Point3D([x, t, z])),
-                     Line(_a, Point3D([s, y, z])),
-                     Line(_b, Point3D([s, t, z])),
-                     Line(_b, Point3D([s, y, u])),
-                     Line(_b, Point3D([x, t, u])),
-                     Line(Point3D([x, t, z]), Point3D([s, t, z])),
-                     Line(Point3D([s, y, z]), Point3D([s, t, z])),
-                     Line(Point3D([s, y, z]), Point3D([s, y, u])),
-                     Line(Point3D([x, t, z]), Point3D([x, t, u])),
-                     Line(Point3D([x, t, u]), Point3D([x, y, u])),
-                     Line(Point3D([x, y, u]), Point3D([s, y, u]))])
+        return iter([Line(_a, point_3d(x, y, u)),
+                     Line(_a, point_3d(x, t, z)),
+                     Line(_a, point_3d(s, y, z)),
+                     Line(_b, point_3d(s, t, z)),
+                     Line(_b, point_3d(s, y, u)),
+                     Line(_b, point_3d(x, t, u)),
+                     Line(point_3d(x, t, z), point_3d(s, t, z)),
+                     Line(point_3d(s, y, z), point_3d(s, t, z)),
+                     Line(point_3d(s, y, z), point_3d(s, y, u)),
+                     Line(point_3d(x, t, z), point_3d(x, t, u)),
+                     Line(point_3d(x, t, u), point_3d(x, y, u)),
+                     Line(point_3d(x, y, u), point_3d(s, y, u))])
 
     def __repr__(self):
         return "Box(%s, %s)" % (str(self.a), str(self.b))
