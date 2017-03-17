@@ -29,6 +29,9 @@ class Ellipse(Polygon):
                                self.center[1] + self.b * sin(theta * 2 / n * pi)]) for theta in range(self.n)]
             super().__init__(points)
 
+    def copy(self):
+        return Ellipse(self.center, self.a, self.b, self.n).transform(self.mat)
+
     def __repr__(self):
         return "Ellipse(%s, %s, %s)" % (self.center, self.a, self.b)
 
@@ -41,6 +44,9 @@ class Circle(Ellipse):
 
     def __repr__(self):
         return "Circle(%s, %s)" % (str(self.center), str(self.a))
+
+    def copy(self):
+        return Circle(self.center, self.a).transform(self.mat)
 
     def circle_points(self, n, stand=False):
         """
