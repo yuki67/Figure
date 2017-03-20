@@ -51,7 +51,9 @@ class FigureViewer(tkinter.Tk):
         # ファイルをロード
         self.module = __import__(filename[:-3])
         # レンダリングされるのは[0, 1]*[0, 1]の部分
-        self.renderer = RendererTk2D(self, Matrix.affine2D(scale=[width, height], trans=[self.SPACE, self.SPACE]))
+        self.renderer = RendererTk2D(self,
+                                     Matrix.affine2D(scale=[width, height], trans=[self.SPACE, self.SPACE]) *
+                                     Matrix.affine2D(center=[0.0, height / 2 + self.SPACE], swap=[0, 1]))
         self.renderer.pack()
         # figureをロードする
         self.reload_figure()
