@@ -35,6 +35,18 @@ class ReloadButton(tkinter.Button):
         self.master.reload_figure()
 
 
+class SaveButton(tkinter.Button):
+    """ 画像の保存用ボタン """
+
+    def __init__(self, master):
+        super().__init__(master)
+        self["text"] = "save"
+        self.bind("<Button-1>", self.on_button_click)
+
+    def on_button_click(self, _):
+        self.master.save_figure()
+
+
 class FigureViewer(tkinter.Tk):
     """
     Figureのビューア
@@ -42,6 +54,8 @@ class FigureViewer(tkinter.Tk):
     """
     # 上下左右の余白
     SPACE = 50
+    # 保存される画像のサイズ
+    IMG_SIZE = 1024
 
     def __init__(self, width, height, filename, window_name="My window"):
         """ self.filenameの中で定義されたfigureが描画される """
@@ -64,6 +78,7 @@ class FigureViewer(tkinter.Tk):
         self.geometry("%dx%d" % (width + self.SPACE * 2, height + self.SPACE * 2))
         self.attributes("-topmost", True)
         ReloadButton(self).pack()
+        SaveButton(self).pack()
         # このupdate()を抜かすとCanvasとButtonが配置されない
         self.update()
 
@@ -74,6 +89,17 @@ class FigureViewer(tkinter.Tk):
         importlib.reload(self.module)
         self.renderer.render(self.module.figure)
         self.update()
+
+    def save_figure(self):
+        """ self.module.figureをjpg画像で保存する """
+        from PIL import Image
+        from RendererJPG import RendererJPG2D
+        img = Image.new("RGB", (self.IMG_SIZE + 1, self.IMG_SIZE + 1), "white")
+        renderer = RendererJPG2D(img,
+                                 Matrix.affine2D(scale=[self.IMG_SIZE, self.IMG_SIZE]) *
+                                 Matrix.affine2D(center=[0.0, self.IMG_SIZE / 2], swap=[0, 1]))
+        renderer.render(self.module.figure)
+        img.save(self.module.__name__ + ".jpg")
 
 r = FigureViewer(512, 512, "test.py")
 r.mainloop()
