@@ -13,7 +13,6 @@ class RendererTk2D(tkinter.Canvas, Renderer):
     def __init__(self, master, screen_mat):
         tkinter.Canvas.__init__(self, master, width=master.winfo_width(), height=master.winfo_height())
         Renderer.__init__(self, screen_mat)
-        self.pack()
         self.render_functions[Point] = self.render_point
         self.render_functions[Line] = self.render_line
 
@@ -41,6 +40,8 @@ class FigureViewer(tkinter.Tk):
     Figureのビューア
     FigureViewer.figureの[0, 1]*[0, 1]の範囲がレンダリングされる
     """
+    # 上下左右の余白
+    SPACE = 50
 
     def __init__(self, width, height, filename, window_name="My window"):
         """ self.filenameの中で定義されたfigureが描画される """
@@ -50,16 +51,17 @@ class FigureViewer(tkinter.Tk):
         # ファイルをロード
         self.module = __import__(filename[:-3])
         # レンダリングされるのは[0, 1]*[0, 1]の部分
-        self.renderer = RendererTk2D(self, Matrix.affine2D(scale=[width, height]))
+        self.renderer = RendererTk2D(self, Matrix.affine2D(scale=[width, height], trans=[self.SPACE, self.SPACE]))
+        self.renderer.pack()
         # figureをロードする
         self.reload_figure()
 
     def initialize(self, width, height, window_name):
         """ ウィンドウの初期化とウィジェットの配置 """
-        ReloadButton(self).pack()
         self.wm_title(window_name)
-        self.geometry("%dx%d" % (width, height))
+        self.geometry("%dx%d" % (width + self.SPACE * 2, height + self.SPACE * 2))
         self.attributes("-topmost", True)
+        ReloadButton(self).pack()
         # このupdate()を抜かすとCanvasとButtonが配置されない
         self.update()
 
