@@ -32,7 +32,7 @@ class ReloadButton(tkinter.Button):
         self.bind("<Button-1>", self.on_button_click)
 
     def on_button_click(self, _):
-        self.master.reload_figure()
+        self.master.master.reload_figure()
 
 
 class SaveButton(tkinter.Button):
@@ -44,7 +44,16 @@ class SaveButton(tkinter.Button):
         self.bind("<Button-1>", self.on_button_click)
 
     def on_button_click(self, _):
-        self.master.save_figure()
+        self.master.master.save_figure()
+
+
+class FrameTop(tkinter.Frame):
+    """ 各種ボタンを収めるフレーム """
+
+    def __init__(self, master):
+        super().__init__(master)
+        ReloadButton(self).pack(side=tkinter.LEFT)
+        SaveButton(self).pack(side=tkinter.LEFT)
 
 
 class FigureViewer(tkinter.Tk):
@@ -73,12 +82,11 @@ class FigureViewer(tkinter.Tk):
         self.reload_figure()
 
     def initialize(self, width, height, window_name):
-        """ ウィンドウの初期化とウィジェットの配置 """
+        """ ウィンドウの初期化とフレームの配置 """
         self.wm_title(window_name)
         self.geometry("%dx%d" % (width + self.SPACE * 2, height + self.SPACE * 2))
         self.attributes("-topmost", True)
-        ReloadButton(self).pack()
-        SaveButton(self).pack()
+        FrameTop(self).pack()
         # このupdate()を抜かすとCanvasとButtonが配置されない
         self.update()
 
