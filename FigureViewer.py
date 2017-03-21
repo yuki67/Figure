@@ -31,10 +31,6 @@ class ReloadButton(tkinter.Button):
     def __init__(self, master):
         super().__init__(master)
         self["text"] = "reload"
-        self.bind("<Button-1>", self.on_button_click)
-
-    def on_button_click(self, _):
-        self.master.master.load_figure()
 
 
 class SaveButton(tkinter.Button):
@@ -43,10 +39,6 @@ class SaveButton(tkinter.Button):
     def __init__(self, master):
         super().__init__(master)
         self["text"] = "save"
-        self.bind("<Button-1>", self.on_button_click)
-
-    def on_button_click(self, _):
-        self.master.master.save_figure()
 
 
 class FilenameList(tkinter.Listbox):
@@ -79,7 +71,8 @@ class FrameTop(tkinter.Frame):
         self.reload_button.pack(side=tkinter.LEFT)
         self.save_button.pack(side=tkinter.LEFT)
         self.filename_list.pack(side=tkinter.LEFT)
-        self.pack()
+        self.reload_button.bind("<Button-1>", lambda event: master.load_figure())
+        self.save_button.bind("<Button-1>", lambda event: master.save_figure())
 
 
 class FigureViewer(tkinter.Tk):
@@ -92,48 +85,47 @@ class FigureViewer(tkinter.Tk):
     # 保存される画像のサイズ
     IMG_SIZE = 1024
 
-    def __init__(self, width, height, filename, window_name="My window"):
-        """ self.filenameの中で定義されたfigureが描画される """
+    def __init__(self, width, height, window_name="My window"):
         super().__init__()
-        self.initialize(width, height, window_name)
-
-        # ファイルをロード
+        self.window_init(width, height, window_name)
         sys.path.append(os.path.abspath("./Gallery"))
+
         # レンダリングされるのは[0, 1]*[0, 1]の部分
         self.renderer = RendererTk2D(self,
                                      Matrix.affine2D(scale=[width, height], trans=[self.SPACE, self.SPACE]) *
                                      Matrix.affine2D(center=[0.0, height / 2 + self.SPACE], swap=[0, 1]))
+        self.frame = FrameTop(self)
+        self.frame.pack()
         self.renderer.pack()
-        # figureをロードする
+
+        # 初回のロード
+        self.module = None
         self.load_figure()
 
-    def initialize(self, width, height, window_name):
-        """ ウィンドウの初期化とフレームの配置 """
+    def window_init(self, width, height, window_name):
         self.wm_title(window_name)
         self.geometry("%dx%d" % (width + self.SPACE * 2, height + self.SPACE * 2))
         self.attributes("-topmost", True)
-        self.frame = FrameTop(self)
         # このupdate()を抜かすとCanvasとButtonが配置されない
         self.update()
 
     def load_figure(self):
-        """ self.module.figureをself.rendererに書く """
+        """ 図形を読み込んでself.rendererに書く """
         self.renderer.delete("all")
-        module = self.frame.filename_list.load()
-        # self.moduleは関数が呼ばれるたびにリロードする
-        self.renderer.render(module.figure)
+        self.module = self.frame.filename_list.load()
+        self.renderer.render(self.module.figure)
         self.update()
 
     def save_figure(self):
-        """ self.module.figureをjpg画像で保存する """
+        """ 表示している図形をjpgで保存する """
         from PIL import Image
         from RendererJPG import RendererJPG2D
         img = Image.new("RGB", (self.IMG_SIZE + 1, self.IMG_SIZE + 1), "white")
         renderer = RendererJPG2D(img,
                                  Matrix.affine2D(scale=[self.IMG_SIZE, self.IMG_SIZE]) *
                                  Matrix.affine2D(center=[0.0, self.IMG_SIZE / 2], swap=[0, 1]))
-        renderer.render(self.frame.filename_list.load().figure)
-        img.save("Gallery//" + self.frame.filename_list.get(tkinter.ACTIVE)[:-3] + ".jpg")
+        renderer.render(self.module.figure)
+        img.save("Gallery//" + self.module.__name__ + ".jpg")
 
 r = FigureViewer(512, 512, "playground.py")
 r.mainloop()
