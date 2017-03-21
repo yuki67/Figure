@@ -118,10 +118,14 @@ class FigureViewer(tkinter.Tk):
         self.attributes("-alpha", 1.0)
 
     def save_figure(self):
-        """ 表示している図形をjpgで保存する """
+        """
+        表示している図形をjpgで保存する
+        ファイルは読み込み直される
+        """
         from PIL import Image
         from RendererJPG import RendererJPG2D
         self.attributes("-alpha", 0.0)
+        self.module = self.frame.filename_list.load()
         img = Image.new("RGB", (self.IMG_SIZE + 1, self.IMG_SIZE + 1), "white")
         renderer = RendererJPG2D(img,
                                  Matrix.affine2D(scale=[self.IMG_SIZE, self.IMG_SIZE]) *
