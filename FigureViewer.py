@@ -5,7 +5,7 @@ import os
 import sys
 from Renderer import Renderer
 from MyMatrix import Matrix
-from Figure import Point, Line
+from Figure import Point, Line, Polygon
 
 
 class RendererTk2D(tkinter.Canvas, Renderer):
@@ -17,12 +17,17 @@ class RendererTk2D(tkinter.Canvas, Renderer):
         Renderer.__init__(self, screen_mat)
         self.render_functions[Point] = self.render_point
         self.render_functions[Line] = self.render_line
+        self.render_functions[Polygon] = self.render_polygon
 
     def render_point(self, p):
         self.create_rectangle(p[0], p[1], p[0] + 1, p[1] + 1, width=0)
 
     def render_line(self, line):
         self.create_line(line.a[0], line.a[1], line.b[0], line.b[1])
+
+    def render_polygon(self, poly):
+        self.create_line(*[[p[0], p[1]] for p in poly.points])
+        self.render_line(Line(poly.points[-1], poly.points[0]))
 
 
 class ReloadButton(tkinter.Button):
