@@ -11,6 +11,10 @@ class Matrix(list):
                  [0.0, 0.0, 1.0, 0.0],
                  [0.0, 0.0, 0.0, 1.0]]
 
+    def __init__(self, lst, is_identity=False):
+        super().__init__(lst)
+        self.is_identity = is_identity
+
     def __repr__(self):
         return "Matrix(%s)" % list.__str__(list(self))
 
@@ -21,7 +25,12 @@ class Matrix(list):
         return Matrix([[a - b for a, b in zip(a_list, b_list)] for a_list, b_list in zip(self, other)])
 
     def __mul__(self, other):
-        return Matrix([[sum([a * b for a, b in zip(self.row(i), other.column(j))]) for j in range(len(other))] for i in range(len(self))])
+        if self.is_identity:
+            return other
+        elif other.is_identity:
+            return self
+        else:
+            return Matrix([[sum([a * b for a, b in zip(self.row(i), other.column(j))]) for j in range(len(other))] for i in range(len(self))])
 
     def row(self, n):
         return self[n]
@@ -33,39 +42,51 @@ class Matrix(list):
     def identity(n):
         # 定値として持っていればそれを返す
         if n == 3:
-            return Matrix(Matrix.iden_three)
+            return Matrix(Matrix.iden_three, True)
         elif n == 4:
-            return Matrix(Matrix.iden_four)
+            return Matrix(Matrix.iden_four, True)
         else:
             # 定値として持っていなければ作る
             ans = [[0 for j in range(n)] for i in range(n)]
             for i in range(n):
                 ans[i][i] = 1
-            return Matrix(ans)
+            return Matrix(ans, True)
 
     @staticmethod
     def rot2D(rot):
-        return Matrix([[cos(rot), sin(rot), 0.0],
-                       [-sin(rot), cos(rot), 0.0],
-                       [0.0, 0.0, 1.0]])
+        if rot == 0.0:
+            return Matrix.identity(3)
+        else:
+            return Matrix([[cos(rot), sin(rot), 0.0],
+                           [-sin(rot), cos(rot), 0.0],
+                           [0.0, 0.0, 1.0]])
 
     @staticmethod
     def trans2D(x, y):
-        return Matrix([[1.0, 0.0, 0.0],
-                       [0.0, 1.0, 0.0],
-                       [x, y, 1.0]])
+        if x == y == 0.0:
+            return Matrix.identity(3)
+        else:
+            return Matrix([[1.0, 0.0, 0.0],
+                           [0.0, 1.0, 0.0],
+                           [x, y, 1.0]])
 
     @staticmethod
     def scale2D(x, y):
-        return Matrix([[x, 0.0, 0.0],
-                       [0.0, y, 0.0],
-                       [0.0, 0.0, 1.0]])
+        if x == y == 1.0:
+            return Matrix.identity(3)
+        else:
+            return Matrix([[x, 0.0, 0.0],
+                           [0.0, y, 0.0],
+                           [0.0, 0.0, 1.0]])
 
     @staticmethod
     def swap2D(x, y):
-        return Matrix([[2 * int(not x) - 1, 0.0, 0.0],
-                       [0.0, 2 * int(not y) - 1, 0.0],
-                       [0.0, 0.0, 1.0]])
+        if x == y == False:
+            return Matrix.identity(3)
+        else:
+            return Matrix([[2 * int(not x) - 1, 0.0, 0.0],
+                           [0.0, 2 * int(not y) - 1, 0.0],
+                           [0.0, 0.0, 1.0]])
 
     @staticmethod
     def affine2D(center=[0.0, 0.0], rot=0.0, scale=[1.0, 1.0], trans=[0.0, 0.0], swap=[False, False]):
@@ -78,39 +99,51 @@ class Matrix(list):
 
     @staticmethod
     def rot3D(x, y, z):
-        return Matrix([[1.0, 0.0, 0.0, 0.0],
-                       [0.0, cos(x), -sin(x), 0.0],
-                       [0.0, sin(x), cos(x), 0.0],
-                       [0.0, 0.0, 0.0, 1.0]]) * \
-            Matrix([[cos(y), 0.0, sin(y), 0.0],
-                    [0.0, 1.0, 0.0, 0.0],
-                    [-sin(y), 0.0, cos(y), 0.0],
-                    [0.0, 0.0, 0.0, 1.0]]) * \
-            Matrix([[cos(z), -sin(z), 0.0, 0.0],
-                    [sin(z), cos(z), 0.0, 0.0],
-                    [0.0, 0.0, 1.0, 0.0],
-                    [0.0, 0.0, 0.0, 1.0]])
+        if x == y == z == 0.0:
+            return Matrix.identity(4)
+        else:
+            return Matrix([[1.0, 0.0, 0.0, 0.0],
+                           [0.0, cos(x), -sin(x), 0.0],
+                           [0.0, sin(x), cos(x), 0.0],
+                           [0.0, 0.0, 0.0, 1.0]]) * \
+                Matrix([[cos(y), 0.0, sin(y), 0.0],
+                        [0.0, 1.0, 0.0, 0.0],
+                        [-sin(y), 0.0, cos(y), 0.0],
+                        [0.0, 0.0, 0.0, 1.0]]) * \
+                Matrix([[cos(z), -sin(z), 0.0, 0.0],
+                        [sin(z), cos(z), 0.0, 0.0],
+                        [0.0, 0.0, 1.0, 0.0],
+                        [0.0, 0.0, 0.0, 1.0]])
 
     @staticmethod
     def trans3D(x, y, z):
-        return Matrix([[1.0, 0.0, 0.0, 0.0],
-                       [0.0, 1.0, 0.0, 0.0],
-                       [0.0, 0.0, 1.0, 0.0],
-                       [x, y, z, 1.0]])
+        if x == y == z == 0.0:
+            return Matrix.identity(4)
+        else:
+            return Matrix([[1.0, 0.0, 0.0, 0.0],
+                           [0.0, 1.0, 0.0, 0.0],
+                           [0.0, 0.0, 1.0, 0.0],
+                           [x, y, z, 1.0]])
 
     @staticmethod
     def scale3D(x, y, z):
-        return Matrix([[x, 0.0, 0.0, 0.0],
-                       [0.0, y, 0.0, 0.0],
-                       [0.0, 0.0, z, 0.0],
-                       [0.0, 0.0, 0.0, 1.0]])
+        if x == y == z == 1.0:
+            return Matrix.identity(4)
+        else:
+            return Matrix([[x, 0.0, 0.0, 0.0],
+                           [0.0, y, 0.0, 0.0],
+                           [0.0, 0.0, z, 0.0],
+                           [0.0, 0.0, 0.0, 1.0]])
 
     @staticmethod
     def swap3D(x, y, z):
-        return Matrix([[2 * int(not x) - 1, 0.0, 0.0, 0.0],
-                       [0.0, 2 * int(not y) - 1, 0.0, 0.0],
-                       [0.0, 0.0, 2 * int(not z) - 1, 0.0],
-                       [0.0, 0.0, 0.0, 1.0]])
+        if x == y == z == False:
+            return Matrix.identity(4)
+        else:
+            return Matrix([[2 * int(not x) - 1, 0.0, 0.0, 0.0],
+                           [0.0, 2 * int(not y) - 1, 0.0, 0.0],
+                           [0.0, 0.0, 2 * int(not z) - 1, 0.0],
+                           [0.0, 0.0, 0.0, 1.0]])
 
     @staticmethod
     def projection3D(n, f, l, b, r, t):
