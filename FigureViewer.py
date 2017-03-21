@@ -1,6 +1,8 @@
 """ tkinterのクラスを自分が使いやすい様に改造したもの """
 import tkinter
 import importlib
+import os
+import sys
 from Renderer import Renderer
 from MyMatrix import Matrix
 from Figure import Point, Line
@@ -72,6 +74,7 @@ class FigureViewer(tkinter.Tk):
         self.initialize(width, height, window_name)
 
         # ファイルをロード
+        sys.path.append(os.path.abspath("./Gallery"))
         self.module = __import__(filename[:-3])
         # レンダリングされるのは[0, 1]*[0, 1]の部分
         self.renderer = RendererTk2D(self,
@@ -107,7 +110,7 @@ class FigureViewer(tkinter.Tk):
                                  Matrix.affine2D(scale=[self.IMG_SIZE, self.IMG_SIZE]) *
                                  Matrix.affine2D(center=[0.0, self.IMG_SIZE / 2], swap=[0, 1]))
         renderer.render(self.module.figure)
-        img.save(self.module.__name__ + ".jpg")
+        img.save("Gallery//" + self.module.__name__ + ".jpg")
 
-r = FigureViewer(512, 512, "test.py")
+r = FigureViewer(512, 512, "playground.py")
 r.mainloop()
