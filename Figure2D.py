@@ -61,7 +61,7 @@ class Circle(Ellipse):
         if stand:
             return [point_2d(self.a * cos(2 * pi * i / n) + self.center[0],
                              self.a * sin(2 * pi * i / n) + self.center[1]
-                             ) * Matrix.affine2D(self.center, rot=pi - pi / 2 * 3 / n) for i in range(n)]
+                             ) * Matrix.affine2D(self.center, rot=-pi / 2 + pi * 3 / n) for i in range(n)]
         else:
             return [point_2d(self.a * cos(2 * pi * i / n) + self.center[0],
                              self.a * sin(2 * pi * i / n) + self.center[1]) for i in range(n)]
