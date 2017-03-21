@@ -3,13 +3,6 @@ from math import sin, cos
 
 class Matrix(list):
     # よく使われそうな恒等行列を定値として持っておく
-    iden_three = [[1.0, 0.0, 0.0],
-                  [0.0, 1.0, 0.0],
-                  [0.0, 0.0, 1.0]]
-    iden_four = [[1.0, 0.0, 0.0, 0.0],
-                 [0.0, 1.0, 0.0, 0.0],
-                 [0.0, 0.0, 1.0, 0.0],
-                 [0.0, 0.0, 0.0, 1.0]]
 
     def __init__(self, lst, is_identity=False):
         super().__init__(lst)
@@ -42,9 +35,9 @@ class Matrix(list):
     def identity(n):
         # 定値として持っていればそれを返す
         if n == 3:
-            return Matrix(Matrix.iden_three, True)
+            return iden_three
         elif n == 4:
-            return Matrix(Matrix.iden_four, True)
+            return iden_four
         else:
             # 定値として持っていなければ作る
             ans = [[0 for j in range(n)] for i in range(n)]
@@ -161,3 +154,11 @@ class Matrix(list):
             Matrix.scale3D(*scale) * \
             Matrix.trans3D(*trans) * \
             Matrix.trans3D(*center)
+
+iden_three = Matrix([[1.0, 0.0, 0.0],
+                     [0.0, 1.0, 0.0],
+                     [0.0, 0.0, 1.0]], True)
+iden_four = Matrix([[1.0, 0.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0, 0.0],
+                    [0.0, 0.0, 1.0, 0.0],
+                    [0.0, 0.0, 0.0, 1.0]], True)
