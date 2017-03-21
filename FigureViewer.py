@@ -83,7 +83,7 @@ class FigureViewer(tkinter.Tk):
     # 上下左右の余白
     SPACE = 50
     # 保存される画像のサイズ
-    IMG_SIZE = 1024
+    IMG_SIZE = 2096
 
     def __init__(self, width, height, window_name="My window"):
         super().__init__()
@@ -111,21 +111,24 @@ class FigureViewer(tkinter.Tk):
 
     def load_figure(self):
         """ 図形を読み込んでself.rendererに書く """
+        self.attributes("-alpha", 0.0)
         self.renderer.delete("all")
         self.module = self.frame.filename_list.load()
         self.renderer.render(self.module.figure)
-        self.update()
+        self.attributes("-alpha", 1.0)
 
     def save_figure(self):
         """ 表示している図形をjpgで保存する """
         from PIL import Image
         from RendererJPG import RendererJPG2D
+        self.attributes("-alpha", 0.0)
         img = Image.new("RGB", (self.IMG_SIZE + 1, self.IMG_SIZE + 1), "white")
         renderer = RendererJPG2D(img,
                                  Matrix.affine2D(scale=[self.IMG_SIZE, self.IMG_SIZE]) *
                                  Matrix.affine2D(center=[0.0, self.IMG_SIZE / 2], swap=[0, 1]))
         renderer.render(self.module.figure)
         img.save("Gallery//" + self.module.__name__ + ".jpg")
+        self.attributes("-alpha", 1.0)
 
 r = FigureViewer(512, 512, "playground.py")
 r.mainloop()
