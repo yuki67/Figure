@@ -1,14 +1,14 @@
-""" tkinterのクラスを自分が使いやすい様に改造したもの """
 import tkinter
 import importlib
 import os
 import sys
+import time
 from Renderer import Renderer
 from MyMatrix import Matrix
 from Figure import Point, Line, Polygon
 
 
-class RendererTk2D(tkinter.Canvas, Renderer):
+class RendererTk(tkinter.Canvas, Renderer):
     """ tkinter用レンダラー """
     # 単体でも使えないことはないが使いみちがないと思う
 
@@ -53,7 +53,7 @@ class FilenameList(tkinter.Listbox):
         super().__init__(master)
         self["height"] = 3
         self["selectmode"] = tkinter.SINGLE
-        for file in os.listdir("./Gallery"):
+        for file in os.listdir(self.master.master.workspace):
             if file[-3:] == ".py":
                 self.insert(tkinter.END, file)
 
@@ -81,30 +81,22 @@ class FrameTop(tkinter.Frame):
 
 
 class FigureViewer(tkinter.Tk):
-    """
-    Figureのビューア
-    FigureViewer.figureの[0, 1]*[0, 1]の範囲がレンダリングされる
-    """
+    """ Figureのビューア """
     # 上下左右の余白
     SPACE = 50
     # 保存される画像のサイズ
     IMG_SIZE = 2096
 
-    def __init__(self, width, height, window_name="My window"):
+    def __init__(self, width, height, screen_mat, workspace_name, window_name="FigureViewer"):
         super().__init__()
         self.window_init(width, height, window_name)
-        sys.path.append(os.path.abspath("./Gallery"))
-
-        # レンダリングされるのは[0, 1]*[0, 1]の部分
-        self.renderer = RendererTk2D(self,
-                                     Matrix.affine2D(scale=[width, height], trans=[self.SPACE, self.SPACE]) *
-                                     Matrix.affine2D(center=[0.0, height / 2 + self.SPACE], swap=[0, 1]))
+        self.workspace = workspace_name
+        self.module = None
         self.frame = FrameTop(self)
+        self.renderer = RendererTk(self, screen_mat)
+        sys.path.append(os.path.abspath(self.workspace))
         self.frame.pack()
         self.renderer.pack()
-
-        # 初回のロード
-        self.module = None
         self.load_figure()
 
     def window_init(self, width, height, window_name):
@@ -116,11 +108,11 @@ class FigureViewer(tkinter.Tk):
 
     def load_figure(self):
         """ 図形を読み込んでself.rendererに書く """
-        self.attributes("-alpha", 0.0)
         self.renderer.delete("all")
         self.module = self.frame.filename_list.load()
+        # t = time.time()
         self.renderer.render(self.module.figure)
-        self.attributes("-alpha", 1.0)
+        # print((time.time() - t) * 1000, "ms")
 
     def save_figure(self):
         """
@@ -136,8 +128,5 @@ class FigureViewer(tkinter.Tk):
                                  Matrix.affine2D(scale=[self.IMG_SIZE, self.IMG_SIZE]) *
                                  Matrix.affine2D(center=[0.0, self.IMG_SIZE / 2], swap=[0, 1]))
         renderer.render(self.module.figure)
-        img.save("Gallery//" + self.module.__name__ + ".jpg")
+        img.save(os.path.join(self.workspace, self.module.__name__ + ".jpg"))
         self.attributes("-alpha", 1.0)
-
-r = FigureViewer(512, 512, "playground.py")
-r.mainloop()
