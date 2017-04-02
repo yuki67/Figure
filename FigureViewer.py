@@ -124,9 +124,12 @@ class FigureViewer(tkinter.Tk):
         self.attributes("-alpha", 0.0)
         self.module = self.frame.filename_list.load()
         img = Image.new("RGB", (self.IMG_SIZE + 1, self.IMG_SIZE + 1), "white")
-        renderer = RendererJPG2D(img,
-                                 Matrix.affine2D(scale=[self.IMG_SIZE, self.IMG_SIZE]) *
-                                 Matrix.affine2D(center=[0.0, self.IMG_SIZE / 2], swap=[0, 1]))
+        if len(self.renderer.screen_mat) == 3:
+            renderer = RendererJPG2D(img,
+                                     Matrix.affine2D(scale=[self.IMG_SIZE, self.IMG_SIZE]) *
+                                     Matrix.affine2D(center=[0.0, self.IMG_SIZE / 2], swap=[0, 1]))
+        else:
+            assert False, "3D not available"
         renderer.render(self.module.figure)
         img.save(os.path.join(self.workspace, self.module.__name__ + ".jpg"))
         self.attributes("-alpha", 1.0)
