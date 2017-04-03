@@ -2,17 +2,23 @@
 
 | | |
 |:-----------:|:------------:|
-| 動作環境 operating environment | python3.x |
-| 必要モジュール required python module | pillow (to run Gallery.py) |
+| 動作環境 | python3.x |
+| 必要モジュール | pillow (画像をjpgで保存するときに必要) |
 
 
-点、線分、多角形、フラクタルなどの図形をpythonで扱うためのクラス(Figure.py)とその使用例(Gallery.py)です。
+点、線分、多角形、フラクタルなどの図形をpythonで扱うためのクラスとその使用例です。
 
-python class for figures such as point, line, polygon, fractal etc. (Figure.py) and its simple usage (Gallery.py).
+以下のコマンドで図形のビューアが起動します。スクロールバーから図形を選んで"reload"ボタンを押すと選択した図形が描画されます。また"save"ボタンで見ている図形をjpg画像として保存できます。
 
-`python Gallery.py`を実行すると./Galleryフォルダ内にいくつかの画像が保存されます。実行にはpillowというpythonモジュールが必要です。
+```python
+python FigureViewer2D.py
+```
 
-`python Gallery.py` generates sample pictures in ./Gallery directry. Python module pillow is required to generate the images.
+図形はpythonのソースコードで作られているので、テキストエディタで編集することができます。編集した後に"reload"ボタンを押せば変更が読み込まれます。
+
+![](images/ss.jpg)
+
+以下はビューアで見られる図形の画像です。どの図形も20行程度のプログラムで作られています。
 
 ||||
 |---|---|---|
