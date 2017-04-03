@@ -1,4 +1,3 @@
-""" 図形描画のテスト """
 from math import pi
 from Figure import Fractal, Polygon
 from Figure2D import point_2d, Circle
