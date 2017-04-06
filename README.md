@@ -29,4 +29,4 @@ python FigureViewer2D.py
 |![](Gallery2D/JumpRope.jpg)|![](Gallery2D/KochCurve.jpg)|![](Gallery2D/OneLineSweeping.jpg)|
 |![](Gallery2D/PineCone.jpg)|![](Gallery2D/Shield.jpg)|![](Gallery2D/SierpinskiCarpet.jpg)|
 |![](Gallery2D/Thirdioid.jpg)|![](Gallery2D/Tornado.jpg)|![](Gallery2D/Waves.jpg)|
-|![](Gallery2D/Wire.jpg)|||
+|![](Gallery2D/Wire.jpg)|![](Gallery2D/Blocks.jpg)||
