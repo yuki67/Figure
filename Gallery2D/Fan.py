@@ -16,9 +16,9 @@ class Fan(Figure):
         center = sum([p for p in self.poly.points], point_2d(0, 0)).scaled(1 / 4)
         mid_points = [(self.poly.points[i - 1] + self.poly.points[i]).scaled(1 / 2) for i in range(4)]
         # ズレを(r, t)だけ追加する
-        d = 0.25
-        r = d * sin(center[0]) * dx
-        t = d * sin(center[1]) * dy
+        d = 0.1
+        r = d * dx
+        t = d * dy
         center = center + point_2d(r, t)
         return iter((Fan(Polygon([self.poly.points[0], mid_points[1], center, mid_points[0]]), self.n - 1),
                      Fan(Polygon([mid_points[1], self.poly.points[1], mid_points[2], center]), self.n - 1),
