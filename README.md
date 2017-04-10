@@ -31,3 +31,4 @@ python FigureViewer2D.py
 |![](Gallery2D/Thirdioid.jpg)|![](Gallery2D/Tornado.jpg)|![](Gallery2D/Waves.jpg)|
 |![](Gallery2D/Wire.jpg)|![](Gallery2D/Blocks.jpg)|![](Gallery2D/Mountain.jpg)|
 |![](Gallery2D/Fan.jpg)|![](Gallery2D/Diamonds.jpg)|![](Gallery2D/Raflesia.jpg)|
+|![](Gallery2D/WarHelmet.jpg)|||
