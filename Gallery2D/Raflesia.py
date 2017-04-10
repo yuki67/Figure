@@ -33,4 +33,4 @@ class Raflesia(Figure):
 
 s = 1.0
 points = [point_2d(0.0, 0.0), point_2d(s, 0.0), point_2d(s, s), point_2d(0.0, s)]
-figure = Raflesia(Polygon(points), 8).transform(Matrix.affine2D(trans=[0.025, 0.025], scale=[1.2, 1.2]))
+figure = Raflesia(Polygon(points), 6).transform(Matrix.affine2D(trans=[0.025, 0.025], scale=[1.2, 1.2]))
