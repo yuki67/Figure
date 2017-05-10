@@ -9,7 +9,7 @@ class Nine(Figure):
     def get_iter(self):
         if self.n == 0:
             return iter((self.poly),)
-        t = 0.35
+        t = 0.4
         center = sum([p for p in self.poly.points], point_2d(0, 0)).scaled(1 / 4)
         mid_points = [self.poly.points[3].scaled(t) + self.poly.points[0].scaled(1 - t),
                       self.poly.points[0].scaled(1 - t) + self.poly.points[1].scaled(t),
